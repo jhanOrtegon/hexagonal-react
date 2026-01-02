@@ -1,6 +1,14 @@
 #!/bin/sh
 
-# Pre-push hook: Run build to ensure code compiles before pushing
+# Pre-push hook: Run tests and build to ensure code compiles before pushing
+echo "🧪 Running tests before push..."
+pnpm test:run
+
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed! Fix tests before pushing."
+  exit 1
+fi
+
 echo "🏗️  Running build before push..."
 pnpm run build
 
@@ -9,4 +17,4 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "✅ Build successful! Proceeding with push..."
+echo "✅ All checks passed! Proceeding with push..."
