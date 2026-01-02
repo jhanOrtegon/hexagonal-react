@@ -7,13 +7,7 @@ export class User {
   public readonly createdAt: Date;
   public readonly updatedAt: Date;
 
-  private constructor(
-    id: string,
-    email: string,
-    name: string,
-    createdAt: Date,
-    updatedAt: Date
-  ) {
+  private constructor(id: string, email: string, name: string, createdAt: Date, updatedAt: Date) {
     this.id = id;
     this.email = email;
     this.name = name;
@@ -21,30 +15,30 @@ export class User {
     this.updatedAt = updatedAt;
   }
 
-  public static create(data: {
-    email: string;
-    name: string;
-  }): User {
+  public static create(data: { email: string; name: string }): User {
     if (data.email.trim().length === 0) {
       throw new InvalidArgumentError('email', 'Email is required');
     }
 
-    if (data.name.trim().length === 0) {
+    const trimmedEmail: string = data.email.trim();
+    const trimmedName: string = data.name.trim();
+
+    if (trimmedName.length === 0) {
       throw new InvalidArgumentError('name', 'Name is required');
     }
 
-    if (data.name.trim().length > 100) {
+    if (trimmedName.length > 100) {
       throw new InvalidArgumentError('name', 'Name is too long (max 100 characters)');
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
       throw new InvalidArgumentError('email', 'Invalid email format');
     }
 
     return new User(
       crypto.randomUUID(),
-      data.email.toLowerCase().trim(),
-      data.name.trim(),
+      trimmedEmail.toLowerCase(),
+      trimmedName,
       new Date(),
       new Date()
     );
@@ -57,13 +51,7 @@ export class User {
     createdAt: Date;
     updatedAt: Date;
   }): User {
-    return new User(
-      data.id,
-      data.email,
-      data.name,
-      data.createdAt,
-      data.updatedAt
-    );
+    return new User(data.id, data.email, data.name, data.createdAt, data.updatedAt);
   }
 
   public updateName(newName: string): User {
@@ -75,13 +63,7 @@ export class User {
       throw new InvalidArgumentError('name', 'Name is too long (max 100 characters)');
     }
 
-    return new User(
-      this.id,
-      this.email,
-      newName.trim(),
-      this.createdAt,
-      new Date()
-    );
+    return new User(this.id, this.email, newName.trim(), this.createdAt, new Date());
   }
 
   public updateEmail(newEmail: string): User {
@@ -93,18 +75,10 @@ export class User {
       throw new InvalidArgumentError('email', 'Invalid email format');
     }
 
-    return new User(
-      this.id,
-      newEmail.toLowerCase().trim(),
-      this.name,
-      this.createdAt,
-      new Date()
-    );
+    return new User(this.id, newEmail.toLowerCase().trim(), this.name, this.createdAt, new Date());
   }
 
   public equals(other: User): boolean {
     return this.id === other.id;
   }
 }
-
-
