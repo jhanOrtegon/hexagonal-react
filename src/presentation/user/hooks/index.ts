@@ -1,5 +1,9 @@
 export { useUser } from './useUser';
 export { useUsers } from './useUsers';
-export { useCreateUser } from './useCreateUser';
-export { useUpdateUser } from './useUpdateUser';
-export { useDeleteUser } from './useDeleteUser';
+export {
+  useUserQuery,
+  useUsersQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+} from './useUser.query';

@@ -76,21 +76,25 @@ export class ProductLocalRepository implements ProductRepository {
     // Aplicar filtros
     if (filters.name !== undefined) {
       const searchTerm: string = filters.name.toLowerCase();
-      products = products.filter((p: Product) => p.name.toLowerCase().includes(searchTerm));
+      products = products.filter((p: Product): boolean =>
+        p.name.toLowerCase().includes(searchTerm)
+      );
     }
 
     if (filters.minPrice !== undefined) {
-      const {minPrice} = filters;
-      products = products.filter((p: Product) => p.price >= minPrice);
+      // eslint-disable-next-line prefer-destructuring
+      const minPrice: number = filters.minPrice;
+      products = products.filter((p: Product): boolean => p.price >= minPrice);
     }
 
     if (filters.maxPrice !== undefined) {
-      const {maxPrice} = filters;
-      products = products.filter((p: Product) => p.price <= maxPrice);
+      // eslint-disable-next-line prefer-destructuring
+      const maxPrice: number = filters.maxPrice;
+      products = products.filter((p: Product): boolean => p.price <= maxPrice);
     }
 
     if (filters.inStock !== undefined && filters.inStock) {
-      products = products.filter((p: Product) => p.hasStock());
+      products = products.filter((p: Product): boolean => p.hasStock());
     }
 
     return Promise.resolve(products);

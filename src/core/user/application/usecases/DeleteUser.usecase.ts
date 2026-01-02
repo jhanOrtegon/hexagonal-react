@@ -1,6 +1,6 @@
 import { UserNotFoundError } from '../../domain/User.errors';
 
-import type { UserRepository } from '../../domain/User.repository';
+import type { UserRepository } from '../../domain/types/repository.types';
 
 export class DeleteUser {
   private readonly userRepository: UserRepository;
@@ -11,7 +11,7 @@ export class DeleteUser {
 
   public async execute(id: string): Promise<void> {
     const exists: boolean = await this.userRepository.exists(id);
-    
+
     if (!exists) {
       throw new UserNotFoundError(id);
     }

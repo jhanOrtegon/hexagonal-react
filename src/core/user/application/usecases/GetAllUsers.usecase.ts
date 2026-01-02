@@ -1,7 +1,8 @@
 import { UserResponseMapper } from '../dtos/UserResponse.dto';
 
+import type { UserRepository } from '../../domain/types/repository.types';
+import type { UserFilters } from '../../domain/types/user.types';
 import type { User } from '../../domain/User.entity';
-import type { UserRepository, UserFilters } from '../../domain/User.repository';
 import type { UserResponseDTO } from '../dtos/UserResponse.dto';
 
 export class GetAllUsers {

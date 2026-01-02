@@ -1,3 +1,5 @@
+/* eslint-disable promise/prefer-await-to-then */
+/* eslint-disable promise/prefer-await-to-callbacks */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { CreateUserDTO, UpdateUserDTO, UserResponseDTO } from '@/core/user/application/types';
@@ -10,11 +12,7 @@ import type { UserFilters, UserRepository } from '@/core/user/domain/types';
 import { container } from '@/infrastructure/di/container';
 import { queryKeys } from '@/infrastructure/shared/react-query/config';
 
-import type {
-  QueryClient,
-  UseMutationResult,
-  UseQueryResult,
-} from '@tanstack/react-query';
+import type { QueryClient, UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
 /**
  * Hook para obtener todos los usuarios con filtros opcionales
@@ -52,11 +50,7 @@ export function useUserQuery(userId: string): UseQueryResult<UserResponseDTO> {
  * Hook para crear un nuevo usuario
  * Invalida automáticamente la lista de usuarios después de crear
  */
-export function useCreateUserMutation(): UseMutationResult<
-  UserResponseDTO,
-  Error,
-  CreateUserDTO
-> {
+export function useCreateUserMutation(): UseMutationResult<UserResponseDTO, Error, CreateUserDTO> {
   const queryClient: QueryClient = useQueryClient();
 
   return useMutation({
@@ -97,7 +91,7 @@ export function useUpdateUserMutation(): UseMutationResult<
       const useCase: UpdateUser = new UpdateUser(repository);
       return await useCase.execute(id, data);
     },
-    onSuccess: (_data: UserResponseDTO, variables: { id: string }): void => {
+    onSuccess: (_data: UserResponseDTO, variables: { id: string; data: UpdateUserDTO }): void => {
       // Invalida el detalle específico del usuario
       queryClient
         .invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) })

@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/typedef */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable promise/prefer-await-to-then */
+/* eslint-disable promise/prefer-await-to-callbacks */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseAsyncQueryOptions<T> {

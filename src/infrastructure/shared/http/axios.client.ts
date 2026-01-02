@@ -1,8 +1,15 @@
 /* eslint-disable @typescript-eslint/typedef */
- 
+/* eslint-disable promise/prefer-await-to-callbacks */
+/* eslint-disable promise/no-promise-in-callback */
+
 import axios from 'axios';
 
-import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import type {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios';
 
 /**
  * Axios Client Configuration
@@ -21,20 +28,20 @@ export const axiosClient: AxiosInstance = axios.create({
 
 // Request Interceptor - Agregar token de autenticación si existe
 axiosClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => 
+  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig =>
     // Aquí puedes agregar tokens de autenticación
     // const token = localStorage.getItem('auth_token');
     // if (token) {
     //   config.headers.Authorization = `Bearer ${token}`;
     // }
-     config
-  ,
-  async (error: unknown): Promise<never> => await Promise.reject(error)
+    config,
+  async (error: unknown): Promise<never> =>
+    await Promise.reject(error instanceof Error ? error : new Error(String(error)))
 );
 
 // Response Interceptor - Manejo centralizado de errores
 axiosClient.interceptors.response.use(
-  (response) => response,
+  (response: AxiosResponse): AxiosResponse => response,
   async (error: unknown): Promise<never> => {
     if (axios.isAxiosError(error)) {
       // Manejo de errores HTTP
@@ -65,7 +72,7 @@ axiosClient.interceptors.response.use(
       }
     }
 
-    return await Promise.reject(error);
+    return await Promise.reject(error instanceof Error ? error : new Error(String(error)));
   }
 );
 

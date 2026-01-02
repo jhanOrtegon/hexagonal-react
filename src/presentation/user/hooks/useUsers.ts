@@ -1,10 +1,12 @@
- 
 /* eslint-disable @typescript-eslint/typedef */
+/* eslint-disable promise/prefer-await-to-then */
+/* eslint-disable promise/prefer-await-to-callbacks */
 import { useCallback, useEffect, useState } from 'react';
 
 import type { UserResponseDTO } from '@/core/user/application/dtos/UserResponse.dto';
 import { GetAllUsers } from '@/core/user/application/usecases/GetAllUsers.usecase';
-import type { UserFilters, UserRepository } from '@/core/user/domain/User.repository';
+import type { UserRepository } from '@/core/user/domain/types/repository.types';
+import type { UserFilters } from '@/core/user/domain/types/user.types';
 import { container } from '@/infrastructure/di/container';
 
 interface UseUsersReturn {
@@ -22,7 +24,7 @@ interface UseUsersReturn {
 export function useUsers(filters?: UserFilters): UseUsersReturn {
   const [users, setUsers]: [
     UserResponseDTO[],
-    React.Dispatch<React.SetStateAction<UserResponseDTO[]>>
+    React.Dispatch<React.SetStateAction<UserResponseDTO[]>>,
   ] = useState<UserResponseDTO[]>([]);
 
   const [isLoading, setIsLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =

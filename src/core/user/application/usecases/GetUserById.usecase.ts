@@ -1,8 +1,8 @@
 import { UserNotFoundError } from '../../domain/User.errors';
 import { UserResponseMapper } from '../dtos/UserResponse.dto';
 
+import type { UserRepository } from '../../domain/types/repository.types';
 import type { User } from '../../domain/User.entity';
-import type { UserRepository } from '../../domain/User.repository';
 import type { UserResponseDTO } from '../dtos/UserResponse.dto';
 
 export class GetUserById {
@@ -14,7 +14,7 @@ export class GetUserById {
 
   public async execute(id: string): Promise<UserResponseDTO> {
     const user: User | null = await this.userRepository.findById(id);
-    
+
     if (user === null) {
       throw new UserNotFoundError(id);
     }

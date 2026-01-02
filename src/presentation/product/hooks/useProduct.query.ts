@@ -1,3 +1,5 @@
+/* eslint-disable promise/prefer-await-to-then */
+/* eslint-disable promise/prefer-await-to-callbacks */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type {
@@ -16,16 +18,18 @@ import type { ProductRepository, ProductFilters } from '@/core/product/domain/ty
 import { container } from '@/infrastructure/di/container';
 import { queryKeys } from '@/infrastructure/shared/react-query/config';
 
-
 import type { QueryClient, UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
+// Constantes para mensajes de error
+// eslint-disable-next-line @typescript-eslint/typedef
+const ERROR_INVALIDATING_PRODUCTS_LIST = 'Error invalidating products list:' as const;
+// eslint-disable-next-line @typescript-eslint/typedef
+const ERROR_INVALIDATING_PRODUCT_DETAIL = 'Error invalidating product detail:' as const;
 
 /**
  * Hook para obtener todos los productos con filtros opcionales
  */
-export function useProductsQuery(
-  filters?: ProductFilters
-): UseQueryResult<ProductResponseDTO[]> {
+export function useProductsQuery(filters?: ProductFilters): UseQueryResult<ProductResponseDTO[]> {
   return useQuery({
     queryKey: queryKeys.products.list(filters),
     queryFn: async (): Promise<ProductResponseDTO[]> => {
@@ -69,9 +73,11 @@ export function useCreateProductMutation(): UseMutationResult<
     },
     onSuccess: (): void => {
       // Invalida todas las listas para refetch
-      queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() }).catch((err: unknown) => {
-        console.error('Error invalidating products list:', err);
-      });
+      queryClient
+        .invalidateQueries({ queryKey: queryKeys.products.lists() })
+        .catch((err: unknown) => {
+          console.error(ERROR_INVALIDATING_PRODUCTS_LIST, err);
+        });
     },
   });
 }
@@ -94,14 +100,18 @@ export function useUpdateProductMutation(): UseMutationResult<
     },
     onSuccess: (data: ProductResponseDTO): void => {
       // Invalida el cache del producto actualizado
-      queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(data.id) }).catch((err: unknown) => {
-        console.error('Error invalidating product detail:', err);
-      });
+      queryClient
+        .invalidateQueries({ queryKey: queryKeys.products.detail(data.id) })
+        .catch((err: unknown) => {
+          console.error(ERROR_INVALIDATING_PRODUCT_DETAIL, err);
+        });
 
       // Invalida todas las listas para refetch
-      queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() }).catch((err: unknown) => {
-        console.error('Error invalidating products list:', err);
-      });
+      queryClient
+        .invalidateQueries({ queryKey: queryKeys.products.lists() })
+        .catch((err: unknown) => {
+          console.error(ERROR_INVALIDATING_PRODUCTS_LIST, err);
+        });
     },
   });
 }
@@ -124,9 +134,11 @@ export function useDeleteProductMutation(): UseMutationResult<undefined, Error, 
       queryClient.removeQueries({ queryKey: queryKeys.products.detail(productId) });
 
       // Invalida todas las listas para refetch
-      queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() }).catch((err: unknown) => {
-        console.error('Error invalidating products list:', err);
-      });
+      queryClient
+        .invalidateQueries({ queryKey: queryKeys.products.lists() })
+        .catch((err: unknown) => {
+          console.error(ERROR_INVALIDATING_PRODUCTS_LIST, err);
+        });
     },
   });
 }
