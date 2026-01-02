@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/typedef */
-/* eslint-disable promise/prefer-await-to-then */
-/* eslint-disable promise/prefer-await-to-callbacks */
 import { useCallback, useEffect, useState } from 'react';
 
 import type { UserResponseDTO } from '@/core/user/application/dtos/UserResponse.dto';
@@ -50,24 +47,22 @@ export function useUsers(filters?: UserFilters): UseUsersReturn {
     }
   }, [filters]);
 
-  useEffect((): (() => void) | undefined => {
-    let cancelled = false;
+  useEffect((): (() => void) => {
+    const cancelledRef: { current: boolean } = { current: false };
 
-    const loadUsers = async (): Promise<void> => {
-      if (cancelled) {
-        return;
+    const loadUsers: () => Promise<void> = async (): Promise<void> => {
+      if (!cancelledRef.current) {
+        await fetchUsers();
       }
-      await fetchUsers();
     };
 
-    loadUsers().catch((err: unknown): void => {
-      if (!cancelled) {
-        console.error('Error loading users:', err);
-      }
+    // eslint-disable-next-line promise/prefer-await-to-then -- useEffect requires promise chain
+    loadUsers().catch((): void => {
+      // Error already handled in fetchUsers
     });
 
     return (): void => {
-      cancelled = true;
+      cancelledRef.current = true;
     };
   }, [fetchUsers]);
 

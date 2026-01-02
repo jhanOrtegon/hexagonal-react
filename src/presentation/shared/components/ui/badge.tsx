@@ -4,8 +4,19 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '../../lib/utils';
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const badgeVariants = cva(
+const badgeVariants: ReturnType<
+  typeof cva<{
+    variant: {
+      default: string;
+      secondary: string;
+      destructive: string;
+      outline: string;
+      success: string;
+      warning: string;
+      info: string;
+    };
+  }>
+> = cva(
   'inline-flex items-center rounded-full border border-gray-200 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-950 focus:ring-offset-2',
   {
     variants: {

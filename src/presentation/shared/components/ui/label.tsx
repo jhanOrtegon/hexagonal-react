@@ -5,8 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '../../lib/utils';
 
-// eslint-disable-next-line @typescript-eslint/typedef
-const labelVariants = cva(
+const labelVariants: ReturnType<typeof cva> = cva(
   'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
 );
 

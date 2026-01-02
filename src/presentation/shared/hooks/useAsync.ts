@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/typedef */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable promise/prefer-await-to-then */
-/* eslint-disable promise/prefer-await-to-callbacks */
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseAsyncQueryOptions<T> {
@@ -25,15 +21,21 @@ export function useAsyncQuery<T>(
   deps: React.DependencyList = [],
   options: UseAsyncQueryOptions<T> = {}
 ): UseAsyncQueryReturn<T> {
-  const { initialData = null, enabled = true } = options;
+  const { initialData, enabled = true }: UseAsyncQueryOptions<T> = options;
 
-  const [data, setData] = useState<T | null>(initialData);
-  const [isLoading, setIsLoading] = useState<boolean>(enabled);
-  const [error, setError] = useState<Error | null>(null);
-  const isMountedRef = useRef<boolean>(true);
+  const [data, setData]: [T | null, React.Dispatch<React.SetStateAction<T | null>>] =
+    useState<T | null>(initialData ?? null);
+  const [isLoading, setIsLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
+    useState<boolean>(enabled);
+  const [error, setError]: [Error | null, React.Dispatch<React.SetStateAction<Error | null>>] =
+    useState<Error | null>(null);
+  const isMountedRef: { readonly current: { value: boolean } } = useRef<{ value: boolean }>({
+    value: true,
+  });
 
-  const execute = useCallback(async (): Promise<void> => {
-    if (!isMountedRef.current) {
+  const execute: () => Promise<void> = useCallback(async (): Promise<void> => {
+    const mountedRef: { value: boolean } = isMountedRef.current;
+    if (!mountedRef.value) {
       return;
     }
 
@@ -43,34 +45,39 @@ export function useAsyncQuery<T>(
     try {
       const result: T = await queryFn();
 
-      if (isMountedRef.current) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- ref value can change
+      if (mountedRef.value) {
         setData(result);
       }
     } catch (err: unknown) {
-      if (isMountedRef.current) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- ref value can change
+      if (mountedRef.value) {
         const errorObj: Error = err instanceof Error ? err : new Error('Unknown error');
         setError(errorObj);
         setData(null);
       }
     } finally {
-      if (isMountedRef.current) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- ref value can change
+      if (mountedRef.value) {
         setIsLoading(false);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are passed as parameter
   }, deps);
 
   useEffect((): (() => void) => {
-    isMountedRef.current = true;
+    const mountedRef: { value: boolean } = isMountedRef.current;
+    mountedRef.value = true;
 
     if (enabled) {
+      // eslint-disable-next-line promise/prefer-await-to-then, promise/prefer-await-to-callbacks -- useEffect requires promise chain
       execute().catch((err: unknown): void => {
         console.error('Error in useAsyncQuery:', err);
       });
     }
 
     return (): void => {
-      isMountedRef.current = false;
+      mountedRef.value = false;
     };
   }, [execute, enabled]);
 
@@ -91,10 +98,12 @@ interface UseAsyncMutationReturn<TArgs extends unknown[], TResult> {
 export function useAsyncMutation<TArgs extends unknown[], TResult>(
   mutationFn: (...args: TArgs) => Promise<TResult>
 ): UseAsyncMutationReturn<TArgs, TResult> {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
+    useState<boolean>(false);
+  const [error, setError]: [Error | null, React.Dispatch<React.SetStateAction<Error | null>>] =
+    useState<Error | null>(null);
 
-  const mutate = useCallback(
+  const mutate: (...args: TArgs) => Promise<TResult> = useCallback(
     async (...args: TArgs): Promise<TResult> => {
       setIsLoading(true);
       setError(null);
@@ -113,7 +122,7 @@ export function useAsyncMutation<TArgs extends unknown[], TResult>(
     [mutationFn]
   );
 
-  const reset = useCallback((): void => {
+  const reset: () => void = useCallback((): void => {
     setError(null);
   }, []);
 

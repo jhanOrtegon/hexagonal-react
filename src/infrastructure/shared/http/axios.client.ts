@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/typedef */
-/* eslint-disable promise/prefer-await-to-callbacks */
-/* eslint-disable promise/no-promise-in-callback */
-
 import axios from 'axios';
 
 import type {
@@ -35,13 +31,16 @@ axiosClient.interceptors.request.use(
     //   config.headers.Authorization = `Bearer ${token}`;
     // }
     config,
+  // eslint-disable-next-line promise/prefer-await-to-callbacks -- Axios error handler requires callback
   async (error: unknown): Promise<never> =>
+    // eslint-disable-next-line promise/no-promise-in-callback -- Axios requires promise rejection
     await Promise.reject(error instanceof Error ? error : new Error(String(error)))
 );
 
 // Response Interceptor - Manejo centralizado de errores
 axiosClient.interceptors.response.use(
   (response: AxiosResponse): AxiosResponse => response,
+  // eslint-disable-next-line promise/prefer-await-to-callbacks -- Axios error handler requires callback
   async (error: unknown): Promise<never> => {
     if (axios.isAxiosError(error)) {
       // Manejo de errores HTTP
@@ -72,6 +71,7 @@ axiosClient.interceptors.response.use(
       }
     }
 
+    // eslint-disable-next-line promise/no-promise-in-callback -- Axios requires promise rejection
     return await Promise.reject(error instanceof Error ? error : new Error(String(error)));
   }
 );
@@ -79,29 +79,35 @@ axiosClient.interceptors.response.use(
 /**
  * Type-safe HTTP client methods
  */
-export const httpClient = {
+export const httpClient: {
+  readonly get: <T>(url: string, config?: AxiosRequestConfig) => Promise<T>;
+  readonly post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => Promise<T>;
+  readonly put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => Promise<T>;
+  readonly patch: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => Promise<T>;
+  readonly delete: <T>(url: string, config?: AxiosRequestConfig) => Promise<T>;
+} = {
   get: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await axiosClient.get<T>(url, config);
+    const response: AxiosResponse<T> = await axiosClient.get<T>(url, config);
     return response.data;
   },
 
   post: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await axiosClient.post<T>(url, data, config);
+    const response: AxiosResponse<T> = await axiosClient.post<T>(url, data, config);
     return response.data;
   },
 
   put: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await axiosClient.put<T>(url, data, config);
+    const response: AxiosResponse<T> = await axiosClient.put<T>(url, data, config);
     return response.data;
   },
 
   patch: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await axiosClient.patch<T>(url, data, config);
+    const response: AxiosResponse<T> = await axiosClient.patch<T>(url, data, config);
     return response.data;
   },
 
   delete: async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    const response = await axiosClient.delete<T>(url, config);
+    const response: AxiosResponse<T> = await axiosClient.delete<T>(url, config);
     return response.data;
   },
 };

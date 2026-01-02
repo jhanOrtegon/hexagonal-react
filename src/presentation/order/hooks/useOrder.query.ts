@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/typedef */
-/* eslint-disable no-void */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -20,16 +18,16 @@ import type {
   UpdateOrderStatusDTO,
 } from '../../../core/order/application/types';
 import type { OrderFilters, OrderRepository } from '../../../core/order/domain/types';
-import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+import type { QueryClient, UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
-const QUERY_KEY_ORDERS = 'orders' as const;
-const QUERY_KEY_ORDER = 'order' as const;
+const QUERY_KEY_ORDERS: 'orders' = 'orders' as const;
+const QUERY_KEY_ORDER: 'order' = 'order' as const;
 
 /**
  * Hook: useOrdersQuery
  * Obtiene la lista de pedidos (con filtros opcionales)
  */
-export const useOrdersQuery = (filters?: OrderFilters): UseQueryResult<OrderResponseDTO[]> => {
+export function useOrdersQuery(filters?: OrderFilters): UseQueryResult<OrderResponseDTO[]> {
   const repository: OrderRepository = container.getOrderRepository();
   const getAllOrders: GetAllOrders = new GetAllOrders(repository);
 
@@ -39,14 +37,14 @@ export const useOrdersQuery = (filters?: OrderFilters): UseQueryResult<OrderResp
     staleTime: 30_000, // 30 segundos
     gcTime: 5 * 60 * 1_000, // 5 minutos
   });
-};
+}
 
 /**
  * Hook: useOrderQuery
  * Obtiene un pedido específico por ID
  */
-export const useOrderQuery = (orderId: string): UseQueryResult<OrderResponseDTO> => {
-  const repository = container.getOrderRepository();
+export function useOrderQuery(orderId: string): UseQueryResult<OrderResponseDTO> {
+  const repository: OrderRepository = container.getOrderRepository();
   const getOrderById: GetOrderById = new GetOrderById(repository);
 
   return useQuery<OrderResponseDTO>({
@@ -55,14 +53,14 @@ export const useOrderQuery = (orderId: string): UseQueryResult<OrderResponseDTO>
     enabled: orderId.length > 0,
     staleTime: 30_000,
   });
-};
+}
 
 /**
  * Hook: useOrdersByUserQuery
  * Obtiene pedidos de un usuario específico
  */
-export const useOrdersByUserQuery = (userId: string): UseQueryResult<OrderResponseDTO[]> => {
-  const repository = container.getOrderRepository();
+export function useOrdersByUserQuery(userId: string): UseQueryResult<OrderResponseDTO[]> {
+  const repository: OrderRepository = container.getOrderRepository();
   const getOrdersByUser: GetOrdersByUser = new GetOrdersByUser(repository);
 
   return useQuery<OrderResponseDTO[]>({
@@ -71,14 +69,14 @@ export const useOrdersByUserQuery = (userId: string): UseQueryResult<OrderRespon
     enabled: userId.length > 0,
     staleTime: 30_000,
   });
-};
+}
 
 /**
  * Hook: useOrdersByProductQuery
  * Obtiene pedidos de un producto específico
  */
-export const useOrdersByProductQuery = (productId: string): UseQueryResult<OrderResponseDTO[]> => {
-  const repository = container.getOrderRepository();
+export function useOrdersByProductQuery(productId: string): UseQueryResult<OrderResponseDTO[]> {
+  const repository: OrderRepository = container.getOrderRepository();
   const getOrdersByProduct: GetOrdersByProduct = new GetOrdersByProduct(repository);
 
   return useQuery<OrderResponseDTO[]>({
@@ -87,76 +85,76 @@ export const useOrdersByProductQuery = (productId: string): UseQueryResult<Order
     enabled: productId.length > 0,
     staleTime: 30_000,
   });
-};
+}
 
 /**
  * Hook: useCreateOrderMutation
  * Crea un nuevo pedido
  */
-export const useCreateOrderMutation = (): UseMutationResult<
+export function useCreateOrderMutation(): UseMutationResult<
   OrderResponseDTO,
   Error,
   CreateOrderDTO
-> => {
-  const queryClient = useQueryClient();
-  const repository = container.getOrderRepository();
+> {
+  const queryClient: QueryClient = useQueryClient();
+  const repository: OrderRepository = container.getOrderRepository();
   const createOrder: CreateOrder = new CreateOrder(repository);
 
   return useMutation<OrderResponseDTO, Error, CreateOrderDTO>({
     mutationFn: async (dto: CreateOrderDTO): Promise<OrderResponseDTO> => createOrder.execute(dto),
-    onSuccess: (): void => {
-      void queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDERS] });
+    onSuccess: async (): Promise<void> => {
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDERS] });
     },
   });
-};
+}
 
 /**
  * Hook: useUpdateOrderStatusMutation
  * Actualiza el estado de un pedido
  */
-export const useUpdateOrderStatusMutation = (): UseMutationResult<
+export function useUpdateOrderStatusMutation(): UseMutationResult<
   OrderResponseDTO,
   Error,
   UpdateOrderStatusDTO
-> => {
-  const queryClient = useQueryClient();
-  const repository = container.getOrderRepository();
+> {
+  const queryClient: QueryClient = useQueryClient();
+  const repository: OrderRepository = container.getOrderRepository();
   const updateOrderStatus: UpdateOrderStatus = new UpdateOrderStatus(repository);
 
   return useMutation<OrderResponseDTO, Error, UpdateOrderStatusDTO>({
     mutationFn: async (dto: UpdateOrderStatusDTO): Promise<OrderResponseDTO> =>
       updateOrderStatus.execute(dto),
-    onSuccess: (data: OrderResponseDTO): void => {
-      void queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDERS] });
-      void queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDER, data.id] });
+    onSuccess: async (data: OrderResponseDTO): Promise<void> => {
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDERS] });
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDER, data.id] });
     },
   });
-};
+}
 
 /**
  * Hook: useCancelOrderMutation
  * Cancela un pedido
  */
-export const useCancelOrderMutation = (): UseMutationResult<OrderResponseDTO, Error, string> => {
-  const queryClient = useQueryClient();
-  const repository = container.getOrderRepository();
+export function useCancelOrderMutation(): UseMutationResult<OrderResponseDTO, Error, string> {
+  const queryClient: QueryClient = useQueryClient();
+  const repository: OrderRepository = container.getOrderRepository();
   const cancelOrder: CancelOrder = new CancelOrder(repository);
 
   return useMutation<OrderResponseDTO, Error, string>({
     mutationFn: async (orderId: string): Promise<OrderResponseDTO> => cancelOrder.execute(orderId),
-    onSuccess: (data: OrderResponseDTO): void => {
-      void queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDERS] });
-      void queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDER, data.id] });
+    onSuccess: async (data: OrderResponseDTO): Promise<void> => {
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDERS] });
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDER, data.id] });
     },
   });
-};
+}
 
 /**
  * Hook: useDeleteOrderMutation
  * Elimina un pedido
  */
-export const useDeleteOrderMutation = (): UseMutationResult<undefined, Error, string> => {
-  const queryClient = useQueryClient();
+export function useDeleteOrderMutation(): UseMutationResult<undefined, Error, string> {
+  const queryClient: QueryClient = useQueryClient();
   const repository: OrderRepository = container.getOrderRepository();
   const deleteOrder: DeleteOrder = new DeleteOrder(repository);
 
@@ -165,9 +163,9 @@ export const useDeleteOrderMutation = (): UseMutationResult<undefined, Error, st
       await deleteOrder.execute(orderId);
       return undefined;
     },
-    onSuccess: (_data: undefined, orderId: string): void => {
-      void queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDERS] });
-      void queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDER, orderId] });
+    onSuccess: async (_data: undefined, orderId: string): Promise<void> => {
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDERS] });
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEY_ORDER, orderId] });
     },
   });
-};
+}

@@ -1,5 +1,3 @@
-/* eslint-disable promise/prefer-await-to-then */
-/* eslint-disable promise/prefer-await-to-callbacks */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type {
@@ -19,12 +17,6 @@ import { container } from '@/infrastructure/di/container';
 import { queryKeys } from '@/infrastructure/shared/react-query/config';
 
 import type { QueryClient, UseMutationResult, UseQueryResult } from '@tanstack/react-query';
-
-// Constantes para mensajes de error
-// eslint-disable-next-line @typescript-eslint/typedef
-const ERROR_INVALIDATING_PRODUCTS_LIST = 'Error invalidating products list:' as const;
-// eslint-disable-next-line @typescript-eslint/typedef
-const ERROR_INVALIDATING_PRODUCT_DETAIL = 'Error invalidating product detail:' as const;
 
 /**
  * Hook para obtener todos los productos con filtros opcionales
@@ -71,13 +63,8 @@ export function useCreateProductMutation(): UseMutationResult<
       const useCase: CreateProduct = new CreateProduct(repository);
       return await useCase.execute(dto);
     },
-    onSuccess: (): void => {
-      // Invalida todas las listas para refetch
-      queryClient
-        .invalidateQueries({ queryKey: queryKeys.products.lists() })
-        .catch((err: unknown) => {
-          console.error(ERROR_INVALIDATING_PRODUCTS_LIST, err);
-        });
+    onSuccess: async (): Promise<void> => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() });
     },
   });
 }
@@ -98,20 +85,9 @@ export function useUpdateProductMutation(): UseMutationResult<
       const useCase: UpdateProduct = new UpdateProduct(repository);
       return await useCase.execute(dto);
     },
-    onSuccess: (data: ProductResponseDTO): void => {
-      // Invalida el cache del producto actualizado
-      queryClient
-        .invalidateQueries({ queryKey: queryKeys.products.detail(data.id) })
-        .catch((err: unknown) => {
-          console.error(ERROR_INVALIDATING_PRODUCT_DETAIL, err);
-        });
-
-      // Invalida todas las listas para refetch
-      queryClient
-        .invalidateQueries({ queryKey: queryKeys.products.lists() })
-        .catch((err: unknown) => {
-          console.error(ERROR_INVALIDATING_PRODUCTS_LIST, err);
-        });
+    onSuccess: async (data: ProductResponseDTO): Promise<void> => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.products.detail(data.id) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() });
     },
   });
 }
@@ -129,16 +105,9 @@ export function useDeleteProductMutation(): UseMutationResult<undefined, Error, 
       await useCase.execute(id);
       return undefined;
     },
-    onSuccess: (_data: undefined, productId: string): void => {
-      // Elimina específicamente el cache del producto eliminado
+    onSuccess: async (_data: undefined, productId: string): Promise<void> => {
       queryClient.removeQueries({ queryKey: queryKeys.products.detail(productId) });
-
-      // Invalida todas las listas para refetch
-      queryClient
-        .invalidateQueries({ queryKey: queryKeys.products.lists() })
-        .catch((err: unknown) => {
-          console.error(ERROR_INVALIDATING_PRODUCTS_LIST, err);
-        });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() });
     },
   });
 }

@@ -1,5 +1,3 @@
-/* eslint-disable promise/prefer-await-to-then */
-/* eslint-disable promise/prefer-await-to-callbacks */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { CreateUserDTO, UpdateUserDTO, UserResponseDTO } from '@/core/user/application/types';
@@ -59,11 +57,8 @@ export function useCreateUserMutation(): UseMutationResult<UserResponseDTO, Erro
       const useCase: CreateUser = new CreateUser(repository);
       return await useCase.execute(data);
     },
-    onSuccess: (): void => {
-      // Invalida todas las queries de usuarios para refetch automático
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.all }).catch((err: unknown) => {
-        console.error('Error invalidating queries:', err);
-      });
+    onSuccess: async (): Promise<void> => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
     },
   });
 }
@@ -91,18 +86,12 @@ export function useUpdateUserMutation(): UseMutationResult<
       const useCase: UpdateUser = new UpdateUser(repository);
       return await useCase.execute(id, data);
     },
-    onSuccess: (_data: UserResponseDTO, variables: { id: string; data: UpdateUserDTO }): void => {
-      // Invalida el detalle específico del usuario
-      queryClient
-        .invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) })
-        .catch((err: unknown) => {
-          console.error('Error invalidating user detail:', err);
-        });
-
-      // Invalida todas las listas de usuarios
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() }).catch((err: unknown) => {
-        console.error('Error invalidating users list:', err);
-      });
+    onSuccess: async (
+      _data: UserResponseDTO,
+      variables: { id: string; data: UpdateUserDTO }
+    ): Promise<void> => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
     },
   });
 }
@@ -121,14 +110,9 @@ export function useDeleteUserMutation(): UseMutationResult<undefined, Error, str
       await useCase.execute(id);
       return undefined;
     },
-    onSuccess: (_data: undefined, userId: string): void => {
-      // Elimina específicamente el cache del usuario eliminado
+    onSuccess: async (_data: undefined, userId: string): Promise<void> => {
       queryClient.removeQueries({ queryKey: queryKeys.users.detail(userId) });
-
-      // Invalida todas las listas para refetch
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() }).catch((err: unknown) => {
-        console.error('Error invalidating users list:', err);
-      });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.users.lists() });
     },
   });
 }
