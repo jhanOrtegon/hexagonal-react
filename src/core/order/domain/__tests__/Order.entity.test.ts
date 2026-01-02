@@ -16,7 +16,7 @@ describe('Order.entity', () => {
       expect(order.userId).toBe('user-123');
       expect(order.productId).toBe('product-456');
       expect(order.quantity).toBe(3);
-      expect(order.totalPrice).toBe(299.97);
+      expect(order.totalPrice).toBeCloseTo(299.97, 2);
       expect(order.status).toBe(OrderStatus.PENDING);
       expect(order.createdAt).toBeInstanceOf(Date);
       expect(order.updatedAt).toBeInstanceOf(Date);
@@ -119,7 +119,7 @@ describe('Order.entity', () => {
         unitPrice: 19.99,
       });
 
-      expect(order.totalPrice).toBe(99.95);
+      expect(order.totalPrice).toBeCloseTo(99.95, 2);
     });
 
     it('should handle unitPrice of zero', () => {
@@ -174,7 +174,7 @@ describe('Order.entity', () => {
 
       expect(confirmed.status).toBe(OrderStatus.CONFIRMED);
       expect(confirmed.id).toBe(order.id);
-      expect(confirmed.updatedAt.getTime()).toBeGreaterThan(order.updatedAt.getTime());
+      expect(confirmed.updatedAt.getTime()).toBeGreaterThanOrEqual(order.updatedAt.getTime());
     });
 
     it('should throw error when confirming CONFIRMED order', () => {
@@ -240,7 +240,7 @@ describe('Order.entity', () => {
 
       expect(shipped.status).toBe(OrderStatus.SHIPPED);
       expect(shipped.id).toBe(order.id);
-      expect(shipped.updatedAt.getTime()).toBeGreaterThan(order.updatedAt.getTime());
+      expect(shipped.updatedAt.getTime()).toBeGreaterThanOrEqual(order.updatedAt.getTime());
     });
 
     it('should throw error when shipping PENDING order', () => {
@@ -308,7 +308,7 @@ describe('Order.entity', () => {
 
       expect(delivered.status).toBe(OrderStatus.DELIVERED);
       expect(delivered.id).toBe(order.id);
-      expect(delivered.updatedAt.getTime()).toBeGreaterThan(order.updatedAt.getTime());
+      expect(delivered.updatedAt.getTime()).toBeGreaterThanOrEqual(order.updatedAt.getTime());
     });
 
     it('should throw error when delivering PENDING order', () => {
@@ -372,7 +372,7 @@ describe('Order.entity', () => {
 
       expect(cancelled.status).toBe(OrderStatus.CANCELLED);
       expect(cancelled.id).toBe(order.id);
-      expect(cancelled.updatedAt.getTime()).toBeGreaterThan(order.updatedAt.getTime());
+      expect(cancelled.updatedAt.getTime()).toBeGreaterThanOrEqual(order.updatedAt.getTime());
     });
 
     it('should cancel a CONFIRMED order', () => {

@@ -1,5 +1,4 @@
 import { Order } from '../../core/order/domain/Order.entity';
-import { OrderNotFoundError } from '../../core/order/domain/Order.errors';
 
 import type { OrderFilters, OrderRepository } from '../../core/order/domain/types';
 import type { OrderData } from '../../core/order/domain/types/order.types';
@@ -131,10 +130,7 @@ export class OrderLocalRepository implements OrderRepository {
     const orders: Order[] = this.getAllFromStorage();
     const filteredOrders: Order[] = orders.filter((order: Order) => order.id !== id);
 
-    if (orders.length === filteredOrders.length) {
-      throw new OrderNotFoundError(id);
-    }
-
+    // Idempotent operation: don't throw if order doesn't exist
     this.saveAllToStorage(filteredOrders);
     return Promise.resolve();
   }
