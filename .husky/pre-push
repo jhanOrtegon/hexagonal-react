@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Pre-push hook: Run build to ensure code compiles before pushing
+echo "🏗️  Running build before push..."
+pnpm run build
+
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed! Fix errors before pushing."
+  exit 1
+fi
+
+echo "✅ Build successful! Proceeding with push..."

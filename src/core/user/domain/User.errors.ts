@@ -1,0 +1,26 @@
+/**
+ * User Domain Errors - Domain Layer
+ * Errores específicos del dominio de usuario
+ */
+
+export class UserNotFoundError extends Error {
+  constructor(id: string) {
+    super(`User with id ${id} not found`);
+    this.name = 'UserNotFoundError';
+  }
+}
+
+export class UserEmailAlreadyExistsError extends Error {
+  constructor(email: string) {
+    super(`User with email ${email} already exists`);
+    this.name = 'UserEmailAlreadyExistsError';
+  }
+}
+
+export class InvalidUserDataError extends Error {
+  constructor(message: string) {
+    super(`Invalid user data: ${message}`);
+    this.name = 'InvalidUserDataError';
+  }
+}
+
