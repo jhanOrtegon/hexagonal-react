@@ -1,5 +1,7 @@
-export type UserId = string;
-export type UserEmail = string;
+/**
+ * User Domain Types
+ * Tipos puros del dominio sin lógica de negocio
+ */
 
 export interface CreateUserData {
   readonly email: string;
@@ -14,8 +16,9 @@ export interface RestoreUserData {
   readonly updatedAt: Date;
 }
 
-export interface UpdateUserData {
+export interface UserFilters {
   readonly name?: string;
   readonly email?: string;
+  readonly createdAfter?: Date;
+  readonly createdBefore?: Date;
 }
-

@@ -1,27 +1,28 @@
-import { HttpError } from '../shared/http';
+import axios from 'axios';
 
-import { type ApiUserRequest, type ApiUserResponse, UserMapper } from './mappers';
+import { UserResponseMapper } from '@/core/user/application/dtos/UserResponse.dto';
+import type { UserResponseDTO } from '@/core/user/application/types';
+import type { UserRepository, UserFilters } from '@/core/user/domain/types';
+import { User } from '@/core/user/domain/User.entity';
 
-import type { User, UserFilters, UserRepository } from '../../core/user';
-import type { HttpClient } from '../shared/http';
+import { httpClient } from '../shared/http/axios.client';
 
+
+/**
+ * UserApiRepository - Implementación con API REST usando Axios
+ * Comunica con backend para persistir usuarios
+ */
 export class UserApiRepository implements UserRepository {
-  private readonly httpClient: HttpClient;
-  private readonly basePath: string;
-
-  constructor(httpClient: HttpClient, basePath?: string) {
-    this.httpClient = httpClient;
-    this.basePath = basePath ?? '/users';
-  }
+  private readonly basePath: string = '/users';
 
   public async findById(id: string): Promise<User | null> {
     try {
-      const response: ApiUserResponse = await this.httpClient.get<ApiUserResponse>(
+      const response: UserResponseDTO = await httpClient.get<UserResponseDTO>(
         `${this.basePath}/${id}`
       );
-      return UserMapper.toDomain(response);
+      return this.mapToEntity(response);
     } catch (error: unknown) {
-      if (error instanceof HttpError && error.status === 404) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         return null;
       }
       throw error;
@@ -30,12 +31,12 @@ export class UserApiRepository implements UserRepository {
 
   public async findByEmail(email: string): Promise<User | null> {
     try {
-      const response: ApiUserResponse = await this.httpClient.get<ApiUserResponse>(
-        `${this.basePath}/email/${encodeURIComponent(email)}`
+      const response: UserResponseDTO = await httpClient.get<UserResponseDTO>(
+        `${this.basePath}/by-email/${encodeURIComponent(email)}`
       );
-      return UserMapper.toDomain(response);
+      return this.mapToEntity(response);
     } catch (error: unknown) {
-      if (error instanceof HttpError && error.status === 404) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         return null;
       }
       throw error;
@@ -43,59 +44,89 @@ export class UserApiRepository implements UserRepository {
   }
 
   public async findAll(filters?: UserFilters): Promise<User[]> {
-    const params: Record<string, string> = {};
-    
-    if (filters?.name !== undefined) {
-      params['name'] = filters.name;
-    }
-    if (filters?.email !== undefined) {
-      params['email'] = filters.email;
-    }
-    if (filters?.createdAfter !== undefined) {
-      params['createdAfter'] = filters.createdAfter.toISOString();
-    }
-    if (filters?.createdBefore !== undefined) {
-      params['createdBefore'] = filters.createdBefore.toISOString();
-    }
+    try {
+      const params: Record<string, string> = {};
 
-    const response: ApiUserResponse[] = await this.httpClient.get<ApiUserResponse[]>(
-      this.basePath,
-      { params }
-    );
-    
-    return response.map((apiUser: ApiUserResponse) => UserMapper.toDomain(apiUser));
+      if (filters?.name !== undefined) {
+        params['name'] = filters.name;
+      }
+
+      if (filters?.email !== undefined) {
+        params['email'] = filters.email;
+      }
+
+      if (filters?.createdAfter !== undefined) {
+        params['createdAfter'] = filters.createdAfter.toISOString();
+      }
+
+      if (filters?.createdBefore !== undefined) {
+        params['createdBefore'] = filters.createdBefore.toISOString();
+      }
+
+      const response: UserResponseDTO[] = await httpClient.get<UserResponseDTO[]>(
+        this.basePath,
+        { params }
+      );
+
+      return response.map((dto: UserResponseDTO) => this.mapToEntity(dto));
+    } catch (error: unknown) {
+      console.error('Error fetching users from API:', error);
+      throw error;
+    }
   }
 
   public async save(user: User): Promise<User> {
-    const exists: boolean = await this.exists(user.id);
-    
-    if (exists) {
-      const request: ApiUserRequest = UserMapper.toApi(user);
-      const response: ApiUserResponse = await this.httpClient.put<ApiUserResponse>(
-        `${this.basePath}/${user.id}`,
-        request
-      );
-      return UserMapper.toDomain(response);
+    try {
+      const dto: UserResponseDTO = UserResponseMapper.fromEntity(user);
+
+      // Verificar si el usuario ya existe (tiene ID válido en la DB)
+      const exists: boolean = await this.exists(user.id);
+
+      if (exists) {
+        // Update
+        const response: UserResponseDTO = await httpClient.put<UserResponseDTO>(
+          `${this.basePath}/${user.id}`,
+          {
+            name: dto.name,
+            email: dto.email,
+          }
+        );
+        return this.mapToEntity(response);
+      } else {
+        // Create
+        const response: UserResponseDTO = await httpClient.post<UserResponseDTO>(
+          this.basePath,
+          {
+            name: dto.name,
+            email: dto.email,
+          }
+        );
+        return this.mapToEntity(response);
+      }
+    } catch (error: unknown) {
+      console.error('Error saving user to API:', error);
+      throw error;
     }
-    
-    const request: ApiUserRequest = UserMapper.toApi(user);
-    const response: ApiUserResponse = await this.httpClient.post<ApiUserResponse>(
-      this.basePath,
-      request
-    );
-    return UserMapper.toDomain(response);
   }
 
   public async delete(id: string): Promise<void> {
-    await this.httpClient.delete(`${this.basePath}/${id}`);
+    try {
+      await httpClient.delete(`${this.basePath}/${id}`);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        // Si no existe, no hacer nada
+        return;
+      }
+      throw error;
+    }
   }
 
   public async exists(id: string): Promise<boolean> {
     try {
-      await this.httpClient.get<ApiUserResponse>(`${this.basePath}/${id}`);
+      await httpClient.get<UserResponseDTO>(`${this.basePath}/${id}`);
       return true;
     } catch (error: unknown) {
-      if (error instanceof HttpError && error.status === 404) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         return false;
       }
       throw error;
@@ -104,16 +135,28 @@ export class UserApiRepository implements UserRepository {
 
   public async existsByEmail(email: string): Promise<boolean> {
     try {
-      await this.httpClient.get<ApiUserResponse>(
-        `${this.basePath}/email/${encodeURIComponent(email)}`
+      await httpClient.get<UserResponseDTO>(
+        `${this.basePath}/by-email/${encodeURIComponent(email)}`
       );
       return true;
     } catch (error: unknown) {
-      if (error instanceof HttpError && error.status === 404) {
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
         return false;
       }
       throw error;
     }
   }
-}
 
+  /**
+   * Helper para mapear DTO a Entity
+   */
+  private mapToEntity(dto: UserResponseDTO): User {
+    return User.restore({
+      id: dto.id,
+      email: dto.email,
+      name: dto.name,
+      createdAt: new Date(dto.createdAt),
+      updatedAt: new Date(dto.updatedAt),
+    });
+  }
+}

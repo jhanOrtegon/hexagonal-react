@@ -1,11 +1,9 @@
-import type { User } from './User.entity';
+/**
+ * User Repository Interface Types
+ */
 
-export interface UserFilters {
-  readonly name?: string;
-  readonly email?: string;
-  readonly createdAfter?: Date;
-  readonly createdBefore?: Date;
-}
+import type { User } from '../User.entity';
+import type { UserFilters } from './user.types';
 
 export interface UserRepository {
   findById(id: string): Promise<User | null>;
@@ -16,4 +14,3 @@ export interface UserRepository {
   exists(id: string): Promise<boolean>;
   existsByEmail(email: string): Promise<boolean>;
 }
-

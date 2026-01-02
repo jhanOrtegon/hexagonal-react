@@ -1,37 +1,33 @@
-import { useState } from 'react'
+import React from 'react';
 
-import reactLogo from './shared/assets/icons/react.svg'
-import { Button } from './shared/components/ui/button'
-import './shared/styles/app.css'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Toaster } from 'sonner';
+
+import { OrderListPage } from './order/pages/OrderListPage';
+import { ProductListPage } from './product/pages/ProductListPage';
+import { Navigation } from './shared/components/Navigation';
+import { UserListPage } from './user/pages/UserListPage';
+
+import './shared/styles/app.css';
 
 function App(): React.JSX.Element {
-  const [count, setCount]: [number, React.Dispatch<React.SetStateAction<number>>] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank" rel="noreferrer">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <main className="mx-auto max-w-7xl py-6">
+          <Routes>
+            <Route path="/" element={<Navigate to="/users" replace />} />
+            <Route path="/users" element={<UserListPage />} />
+            <Route path="/products" element={<ProductListPage />} />
+            <Route path="/orders" element={<OrderListPage />} />
+          </Routes>
+        </main>
+        <Toaster position="top-right" richColors closeButton />
       </div>
-      <h1 className='bg-red-500'>Vite + React</h1>
-      <div className="card">
-        <Button onClick={() => { setCount((count: number) => count + 1); }}>
-          count is {count}
-        </Button>
-        <p>
-          Edit <code>src/presentation/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
 

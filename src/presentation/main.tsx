@@ -1,9 +1,13 @@
-import { StrictMode } from 'react'
+import { StrictMode } from 'react';
 
-import { createRoot } from 'react-dom/client'
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { createRoot } from 'react-dom/client';
 
-import './shared/styles/globals.css'
-import App from './App.tsx'
+import { queryClient } from '@/infrastructure/shared/react-query/config';
+
+import App from './App.tsx';
+import './shared/styles/globals.css';
 
 const rootElement: HTMLElement | null = document.getElementById('root');
 if (rootElement === null) {
@@ -12,7 +16,10 @@ if (rootElement === null) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <QueryClientProvider client={queryClient}>
+      <App />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </StrictMode>,
 );
 
