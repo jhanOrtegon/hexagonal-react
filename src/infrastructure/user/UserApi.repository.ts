@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import type { LoginResponseDTO } from '@/core/user/application/dtos/auth.dto';
 import type { UserResponseDTO } from '@/core/user/application/types';
 import type { UserRepository, UserFilters } from '@/core/user/domain/types';
 import type { User } from '@/core/user/domain/User.entity';
@@ -140,6 +141,26 @@ export class UserApiRepository implements UserRepository {
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         return false;
+      }
+      throw error;
+    }
+  }
+
+  public async login(email: string, password: string): Promise<LoginResponseDTO> {
+    try {
+      const response: LoginResponseDTO = await httpClient.post<LoginResponseDTO>('/auth/login', {
+        email,
+        password,
+      });
+      return response;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          throw new Error('Invalid email or password');
+        }
+        if (error.response?.status === 400) {
+          throw new Error('Invalid login credentials');
+        }
       }
       throw error;
     }

@@ -1,5 +1,7 @@
 import { User, type UserRepository, type UserFilters } from '../../core/user';
 
+import type { LoginResponseDTO } from '../../core/user/application/dtos/auth.dto';
+
 /**
  * UserLocalRepository - Implementación con LocalStorage
  * Persiste usuarios en el navegador usando localStorage
@@ -31,14 +33,15 @@ export class UserLocalRepository implements UserRepository {
         updatedAt: string;
       }[];
 
-      return parsed.map((item: { id: string; email: string; name: string; createdAt: string; updatedAt: string }) =>
-        User.restore({
-          id: item.id,
-          email: item.email,
-          name: item.name,
-          createdAt: new Date(item.createdAt),
-          updatedAt: new Date(item.updatedAt),
-        })
+      return parsed.map(
+        (item: { id: string; email: string; name: string; createdAt: string; updatedAt: string }) =>
+          User.restore({
+            id: item.id,
+            email: item.email,
+            name: item.name,
+            createdAt: new Date(item.createdAt),
+            updatedAt: new Date(item.updatedAt),
+          })
       );
     } catch (error: unknown) {
       console.error('Error reading from localStorage:', error);
@@ -80,7 +83,9 @@ export class UserLocalRepository implements UserRepository {
 
   public findByEmail(email: string): Promise<User | null> {
     const users: User[] = this.getAllFromStorage();
-    const user: User | undefined = users.find((u: User) => u.email.toLowerCase() === email.toLowerCase());
+    const user: User | undefined = users.find(
+      (u: User) => u.email.toLowerCase() === email.toLowerCase()
+    );
     return Promise.resolve(user ?? null);
   }
 
@@ -140,9 +145,32 @@ export class UserLocalRepository implements UserRepository {
 
   public existsByEmail(email: string): Promise<boolean> {
     const users: User[] = this.getAllFromStorage();
-    return Promise.resolve(
-      users.some((u: User) => u.email.toLowerCase() === email.toLowerCase())
-    );
+    return Promise.resolve(users.some((u: User) => u.email.toLowerCase() === email.toLowerCase()));
+  }
+
+  public async login(email: string, password: string): Promise<LoginResponseDTO> {
+    // En localStorage no tenemos contraseñas reales, esto es solo para desarrollo
+    // Simulamos un login exitoso si el usuario existe
+    const user: User | null = await this.findByEmail(email);
+
+    if (user === null) {
+      throw new Error('Invalid email or password');
+    }
+
+    // En desarrollo aceptamos cualquier password (no es seguro, solo para testing)
+    if (password.length === 0) {
+      throw new Error('Password is required');
+    }
+
+    // Retornar respuesta simulada
+    return Promise.resolve({
+      token: `mock-token-${user.id}`,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    });
   }
 
   /**
@@ -152,4 +180,3 @@ export class UserLocalRepository implements UserRepository {
     localStorage.removeItem(this.STORAGE_KEY);
   }
 }
-

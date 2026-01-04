@@ -1,7 +1,11 @@
 import React from 'react';
 
-import { Package, ShoppingCart, Users } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { LogOut, Package, ShoppingCart, Users } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
+import { useAuth } from '../hooks/useAuth';
+
+import { Button } from './ui/button';
 
 interface NavItem {
   readonly name: string;
@@ -17,6 +21,16 @@ const navigation: readonly NavItem[] = [
 
 export const Navigation: React.FC = (): React.JSX.Element => {
   const location: { pathname: string } = useLocation();
+  // eslint-disable-next-line @typescript-eslint/typedef -- Type from react-router-dom
+  const navigate = useNavigate();
+  const { logout, user }: { logout: () => void; user: { email: string } | null } = useAuth();
+
+  const handleLogout: () => void = (): void => {
+    logout();
+    // Navigate is synchronous in react-router-dom v6
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises -- Navigate is sync in v6
+    navigate('/login');
+  };
 
   return (
     <nav className="border-b border-gray-200 bg-white shadow-sm">
@@ -48,10 +62,16 @@ export const Navigation: React.FC = (): React.JSX.Element => {
               })}
             </div>
           </div>
-          <div className="flex items-center">
-            <div className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-              Clean Architecture + TDD
-            </div>
+          <div className="flex items-center gap-4">
+            {user !== null && (
+              <div className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                {user.email}
+              </div>
+            )}
+            <Button onClick={handleLogout} variant="ghost" size="sm" className="gap-2">
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
           </div>
         </div>
       </div>

@@ -18,6 +18,7 @@ describe('DeleteUser UseCase', () => {
       delete: vi.fn().mockResolvedValue(undefined),
       exists: vi.fn().mockResolvedValue(true),
       existsByEmail: vi.fn(),
+      login: vi.fn(),
     };
 
     useCase = new DeleteUser(mockRepository);

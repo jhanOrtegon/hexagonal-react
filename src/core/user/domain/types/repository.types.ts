@@ -4,6 +4,7 @@
 
 import type { User } from '../User.entity';
 import type { UserFilters } from './user.types';
+import type { LoginResponseDTO } from '../../application/dtos/auth.dto';
 
 export interface UserRepository {
   findById(id: string): Promise<User | null>;
@@ -13,4 +14,5 @@ export interface UserRepository {
   delete(id: string): Promise<void>;
   exists(id: string): Promise<boolean>;
   existsByEmail(email: string): Promise<boolean>;
+  login(email: string, password: string): Promise<LoginResponseDTO>;
 }

@@ -1,3 +1,4 @@
+import { LoginUser } from '../../core/user/application/usecases/LoginUser.usecase';
 import { OrderApiRepository } from '../order/OrderApi.repository';
 import { OrderLocalRepository } from '../order/OrderLocal.repository';
 import { ProductApiRepository } from '../product/ProductApi.repository';
@@ -48,8 +49,7 @@ class DIContainer {
   public getUserRepository(): UserRepository {
     if (this.userRepository === null) {
       const useLocal: boolean =
-        this.environment === Environment.TEST ||
-        import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
+        this.environment === Environment.TEST || import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
 
       this.userRepository = useLocal ? new UserLocalRepository() : new UserApiRepository();
     }
@@ -63,8 +63,7 @@ class DIContainer {
   public getProductRepository(): ProductRepository {
     if (this.productRepository === null) {
       const useLocal: boolean =
-        this.environment === Environment.TEST ||
-        import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
+        this.environment === Environment.TEST || import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
 
       this.productRepository = useLocal ? new ProductLocalRepository() : new ProductApiRepository();
     }
@@ -78,8 +77,7 @@ class DIContainer {
   public getOrderRepository(): OrderRepository {
     if (this.orderRepository === null) {
       const useLocal: boolean =
-        this.environment === Environment.TEST ||
-        import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
+        this.environment === Environment.TEST || import.meta.env.VITE_USE_LOCAL_STORAGE === 'true';
 
       this.orderRepository = useLocal ? new OrderLocalRepository() : new OrderApiRepository();
     }
@@ -105,6 +103,14 @@ class DIContainer {
    */
   public setOrderRepository(repository: OrderRepository): void {
     this.orderRepository = repository;
+  }
+
+  /**
+   * Obtiene el caso de uso para login
+   */
+  public getLoginUserUseCase(): LoginUser {
+    const userRepository: UserRepository = this.getUserRepository();
+    return new LoginUser(userRepository);
   }
 
   /**

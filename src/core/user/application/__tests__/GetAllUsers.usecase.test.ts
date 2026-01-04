@@ -44,6 +44,7 @@ describe('GetAllUsers UseCase', () => {
       delete: vi.fn(),
       exists: vi.fn(),
       existsByEmail: vi.fn(),
+      login: vi.fn(),
     };
 
     useCase = new GetAllUsers(mockRepository);

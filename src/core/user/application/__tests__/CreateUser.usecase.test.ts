@@ -21,6 +21,7 @@ describe('CreateUser UseCase', () => {
       delete: vi.fn(),
       exists: vi.fn(),
       existsByEmail: vi.fn().mockResolvedValue(false),
+      login: vi.fn(),
     };
 
     useCase = new CreateUser(mockRepository);
