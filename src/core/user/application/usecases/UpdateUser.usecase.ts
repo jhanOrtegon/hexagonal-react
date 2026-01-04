@@ -23,19 +23,21 @@ export class UpdateUser {
     let updatedUser: User = user;
 
     if (dto.email !== undefined) {
-      if (dto.email !== user.email) {
-        const emailExists: boolean = await this.userRepository.existsByEmail(dto.email);
+      const trimmedEmail: string = dto.email.trim();
+      if (trimmedEmail !== user.email) {
+        const emailExists: boolean = await this.userRepository.existsByEmail(trimmedEmail);
 
         if (emailExists) {
-          throw new UserEmailAlreadyExistsError(dto.email);
+          throw new UserEmailAlreadyExistsError(trimmedEmail);
         }
 
-        updatedUser = updatedUser.updateEmail(dto.email);
+        updatedUser = updatedUser.updateEmail(trimmedEmail);
       }
     }
 
     if (dto.name !== undefined) {
-      updatedUser = updatedUser.updateName(dto.name);
+      const trimmedName: string = dto.name.trim();
+      updatedUser = updatedUser.updateName(trimmedName);
     }
 
     const savedUser: User = await this.userRepository.save(updatedUser);
