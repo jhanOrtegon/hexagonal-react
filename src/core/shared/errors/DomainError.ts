@@ -24,7 +24,12 @@ export class ValidationError extends DomainError {
 }
 
 export class InvalidArgumentError extends DomainError {
+  public readonly field: string;
+  public readonly reason: string;
+
   constructor(argument: string, message: string) {
     super(`Invalid argument ${argument}: ${message}`);
+    this.field = argument;
+    this.reason = message;
   }
 }

@@ -1,3 +1,4 @@
+import { type Result, fail, ok } from '../../shared/domain/Result';
 import { InvalidArgumentError } from '../../shared/errors';
 
 export class User {
@@ -15,32 +16,28 @@ export class User {
     this.updatedAt = updatedAt;
   }
 
-  public static create(data: { email: string; name: string }): User {
+  public static create(data: { email: string; name: string }): Result<User, InvalidArgumentError> {
     if (data.email.trim().length === 0) {
-      throw new InvalidArgumentError('email', 'Email is required');
+      return fail(new InvalidArgumentError('email', 'Email is required'));
     }
 
     const trimmedEmail: string = data.email.trim();
     const trimmedName: string = data.name.trim();
 
     if (trimmedName.length === 0) {
-      throw new InvalidArgumentError('name', 'Name is required');
+      return fail(new InvalidArgumentError('name', 'Name is required'));
     }
 
     if (trimmedName.length > 100) {
-      throw new InvalidArgumentError('name', 'Name is too long (max 100 characters)');
+      return fail(new InvalidArgumentError('name', 'Name is too long (max 100 characters)'));
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      throw new InvalidArgumentError('email', 'Invalid email format');
+      return fail(new InvalidArgumentError('email', 'Invalid email format'));
     }
 
-    return new User(
-      crypto.randomUUID(),
-      trimmedEmail.toLowerCase(),
-      trimmedName,
-      new Date(),
-      new Date()
+    return ok(
+      new User(crypto.randomUUID(), trimmedEmail.toLowerCase(), trimmedName, new Date(), new Date())
     );
   }
 
@@ -54,28 +51,30 @@ export class User {
     return new User(data.id, data.email, data.name, data.createdAt, data.updatedAt);
   }
 
-  public updateName(newName: string): User {
+  public updateName(newName: string): Result<User, InvalidArgumentError> {
     if (newName.trim().length === 0) {
-      throw new InvalidArgumentError('name', 'Name is required');
+      return fail(new InvalidArgumentError('name', 'Name is required'));
     }
 
     if (newName.trim().length > 100) {
-      throw new InvalidArgumentError('name', 'Name is too long (max 100 characters)');
+      return fail(new InvalidArgumentError('name', 'Name is too long (max 100 characters)'));
     }
 
-    return new User(this.id, this.email, newName.trim(), this.createdAt, new Date());
+    return ok(new User(this.id, this.email, newName.trim(), this.createdAt, new Date()));
   }
 
-  public updateEmail(newEmail: string): User {
+  public updateEmail(newEmail: string): Result<User, InvalidArgumentError> {
     if (newEmail.trim().length === 0) {
-      throw new InvalidArgumentError('email', 'Email is required');
+      return fail(new InvalidArgumentError('email', 'Email is required'));
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-      throw new InvalidArgumentError('email', 'Invalid email format');
+      return fail(new InvalidArgumentError('email', 'Invalid email format'));
     }
 
-    return new User(this.id, newEmail.toLowerCase().trim(), this.name, this.createdAt, new Date());
+    return ok(
+      new User(this.id, newEmail.toLowerCase().trim(), this.name, this.createdAt, new Date())
+    );
   }
 
   public equals(other: User): boolean {

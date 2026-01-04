@@ -1,4 +1,6 @@
-import { type Result } from '../../../shared/domain/Result';
+const fs = require('fs');
+
+const testContent = `import { type Result } from '../../../shared/domain/Result';
 import { User } from '../User.entity';
 import { InvalidArgumentError } from '../../../shared/errors';
 
@@ -195,8 +197,7 @@ describe('User Entity', () => {
       expect(createResult.isSuccess()).toBe(true);
       if (createResult.isSuccess()) {
         const user: User = createResult.value;
-        const updateResult: Result<User, InvalidArgumentError> =
-          user.updateEmail('new@example.com');
+        const updateResult: Result<User, InvalidArgumentError> = user.updateEmail('new@example.com');
 
         expect(updateResult.isSuccess()).toBe(true);
         if (updateResult.isSuccess()) {
@@ -271,3 +272,7 @@ describe('User Entity', () => {
     });
   });
 });
+`;
+
+fs.writeFileSync('src/core/user/domain/__tests__/User.entity.test.ts', testContent, 'utf8');
+console.log('✅ User.entity.test.ts recreated with Result Type pattern');

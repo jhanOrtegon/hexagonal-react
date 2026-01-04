@@ -1,6 +1,8 @@
 import { UserNotFoundError, UserEmailAlreadyExistsError } from '../../domain/User.errors';
 import { UserResponseMapper } from '../dtos/UserResponse.dto';
 
+import type { Result } from '../../../shared/domain/Result';
+import type { InvalidArgumentError } from '../../../shared/errors';
 import type { UserRepository } from '../../domain/types/repository.types';
 import type { User } from '../../domain/User.entity';
 import type { UpdateUserDTO } from '../dtos/UpdateUser.dto';
@@ -31,13 +33,22 @@ export class UpdateUser {
           throw new UserEmailAlreadyExistsError(trimmedEmail);
         }
 
-        updatedUser = updatedUser.updateEmail(trimmedEmail);
+        const emailResult: Result<User, InvalidArgumentError> =
+          updatedUser.updateEmail(trimmedEmail);
+        if (emailResult.isFailure()) {
+          throw emailResult.error;
+        }
+        updatedUser = emailResult.value;
       }
     }
 
     if (dto.name !== undefined) {
       const trimmedName: string = dto.name.trim();
-      updatedUser = updatedUser.updateName(trimmedName);
+      const nameResult: Result<User, InvalidArgumentError> = updatedUser.updateName(trimmedName);
+      if (nameResult.isFailure()) {
+        throw nameResult.error;
+      }
+      updatedUser = nameResult.value;
     }
 
     const savedUser: User = await this.userRepository.save(updatedUser);

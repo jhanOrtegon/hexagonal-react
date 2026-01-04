@@ -1,3 +1,5 @@
+import { type Result } from '../../../core/shared/domain/Result';
+import type { InvalidArgumentError } from '../../../core/shared/errors';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { User } from '../../../core/user/domain/User.entity';
 import { UserLocalRepository } from '../UserLocal.repository';
@@ -18,10 +20,14 @@ describe('UserLocalRepository - Integration Tests', () => {
 
   describe('save', () => {
     it('should save a new user to localStorage', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       const savedUser: User = await repository.save(user);
 
@@ -41,14 +47,22 @@ describe('UserLocalRepository - Integration Tests', () => {
     });
 
     it('should update an existing user in localStorage', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository.save(user);
 
-      const updatedUser: User = user.updateName('Updated Name');
+      const updatedResult: Result<User, InvalidArgumentError> = user.updateName('Updated Name');
+      if (updatedResult.isFailure()) {
+        throw updatedResult.error;
+      }
+      const updatedUser: User = updatedResult.value;
       const savedUser: User = await repository.save(updatedUser);
 
       expect(savedUser.name).toBe('Updated Name');
@@ -64,10 +78,14 @@ describe('UserLocalRepository - Integration Tests', () => {
 
   describe('findById', () => {
     it('should find a user by id', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository.save(user);
 
@@ -88,10 +106,14 @@ describe('UserLocalRepository - Integration Tests', () => {
 
   describe('findByEmail', () => {
     it('should find a user by email', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository.save(user);
 
@@ -102,10 +124,14 @@ describe('UserLocalRepository - Integration Tests', () => {
     });
 
     it('should be case-insensitive', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository.save(user);
 
@@ -124,15 +150,23 @@ describe('UserLocalRepository - Integration Tests', () => {
 
   describe('findAll', () => {
     it('should return all users', async () => {
-      const user1: User = User.create({
+      const user1Result: Result<User, InvalidArgumentError> = User.create({
         email: 'user1@example.com',
         name: 'User One',
       });
+      if (user1Result.isFailure()) {
+        throw user1Result.error;
+      }
+      const user1: User = user1Result.value;
 
-      const user2: User = User.create({
+      const user2Result: Result<User, InvalidArgumentError> = User.create({
         email: 'user2@example.com',
         name: 'User Two',
       });
+      if (user2Result.isFailure()) {
+        throw user2Result.error;
+      }
+      const user2: User = user2Result.value;
 
       await repository.save(user1);
       await repository.save(user2);
@@ -145,15 +179,23 @@ describe('UserLocalRepository - Integration Tests', () => {
     });
 
     it('should filter by name', async () => {
-      const user1: User = User.create({
+      const user1Result: Result<User, InvalidArgumentError> = User.create({
         email: 'user1@example.com',
         name: 'John Doe',
       });
+      if (user1Result.isFailure()) {
+        throw user1Result.error;
+      }
+      const user1: User = user1Result.value;
 
-      const user2: User = User.create({
+      const user2Result: Result<User, InvalidArgumentError> = User.create({
         email: 'user2@example.com',
         name: 'Jane Smith',
       });
+      if (user2Result.isFailure()) {
+        throw user2Result.error;
+      }
+      const user2: User = user2Result.value;
 
       await repository.save(user1);
       await repository.save(user2);
@@ -165,15 +207,23 @@ describe('UserLocalRepository - Integration Tests', () => {
     });
 
     it('should filter by email', async () => {
-      const user1: User = User.create({
+      const user1Result: Result<User, InvalidArgumentError> = User.create({
         email: 'john@example.com',
         name: 'John Doe',
       });
+      if (user1Result.isFailure()) {
+        throw user1Result.error;
+      }
+      const user1: User = user1Result.value;
 
-      const user2: User = User.create({
+      const user2Result: Result<User, InvalidArgumentError> = User.create({
         email: 'jane@example.com',
         name: 'Jane Smith',
       });
+      if (user2Result.isFailure()) {
+        throw user2Result.error;
+      }
+      const user2: User = user2Result.value;
 
       await repository.save(user1);
       await repository.save(user2);
@@ -193,10 +243,14 @@ describe('UserLocalRepository - Integration Tests', () => {
 
   describe('delete', () => {
     it('should delete a user', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository.save(user);
 
@@ -213,10 +267,14 @@ describe('UserLocalRepository - Integration Tests', () => {
 
   describe('exists', () => {
     it('should return true when user exists', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository.save(user);
 
@@ -234,10 +292,14 @@ describe('UserLocalRepository - Integration Tests', () => {
 
   describe('existsByEmail', () => {
     it('should return true when user with email exists', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository.save(user);
 
@@ -247,10 +309,14 @@ describe('UserLocalRepository - Integration Tests', () => {
     });
 
     it('should be case-insensitive', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository.save(user);
 
@@ -268,10 +334,14 @@ describe('UserLocalRepository - Integration Tests', () => {
 
   describe('clear', () => {
     it('should clear all users from localStorage', async () => {
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository.save(user);
 
@@ -288,10 +358,14 @@ describe('UserLocalRepository - Integration Tests', () => {
   describe('localStorage persistence', () => {
     it('should persist data across repository instances', async () => {
       const repository1: UserLocalRepository = new UserLocalRepository();
-      const user: User = User.create({
+      const userResult: Result<User, InvalidArgumentError> = User.create({
         email: 'test@example.com',
         name: 'Test User',
       });
+      if (userResult.isFailure()) {
+        throw userResult.error;
+      }
+      const user: User = userResult.value;
 
       await repository1.save(user);
 
