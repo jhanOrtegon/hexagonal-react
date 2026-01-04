@@ -29,9 +29,6 @@ import {
 import { Input } from '@/presentation/shared/components/ui/input';
 import { useAuth } from '@/presentation/shared/hooks/useAuth';
 
-import type { ControllerRenderProps, UseFormReturn } from 'react-hook-form';
-import type { NavigateFunction } from 'react-router-dom';
-
 // Validation schema
 const loginSchema: z.ZodObject<{
   email: z.ZodString;
@@ -44,14 +41,12 @@ const loginSchema: z.ZodObject<{
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export const LoginPage: React.FC = (): React.JSX.Element => {
-  const navigate: NavigateFunction = useNavigate();
-  const { login }: { login: (email: string, password: string) => Promise<void> } = useAuth();
-  const [error, setError]: [string | null, React.Dispatch<React.SetStateAction<string | null>>] =
-    useState<string | null>(null);
-  const [isLoading, setIsLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
-    useState<boolean>(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const form: UseFormReturn<LoginFormValues> = useForm<LoginFormValues>({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -59,7 +54,7 @@ export const LoginPage: React.FC = (): React.JSX.Element => {
     },
   });
 
-  const handleSubmit: (values: LoginFormValues) => void = (values: LoginFormValues): void => {
+  const handleSubmit = (values: LoginFormValues): void => {
     setIsLoading(true);
     setError(null);
 
@@ -92,11 +87,7 @@ export const LoginPage: React.FC = (): React.JSX.Element => {
               <FormField
                 control={form.control}
                 name="email"
-                render={({
-                  field,
-                }: {
-                  field: ControllerRenderProps<LoginFormValues, 'email'>;
-                }): React.JSX.Element => (
+                render={({ field }): React.JSX.Element => (
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
@@ -115,11 +106,7 @@ export const LoginPage: React.FC = (): React.JSX.Element => {
               <FormField
                 control={form.control}
                 name="password"
-                render={({
-                  field,
-                }: {
-                  field: ControllerRenderProps<LoginFormValues, 'password'>;
-                }): React.JSX.Element => (
+                render={({ field }): React.JSX.Element => (
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>

@@ -16,8 +16,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
 }: ProtectedRouteProps): React.JSX.Element => {
-  const { isAuthenticated, isLoading }: { isAuthenticated: boolean; isLoading: boolean } =
-    useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
