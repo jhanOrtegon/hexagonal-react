@@ -132,14 +132,14 @@ export default tseslint.config(
       '@typescript-eslint/typedef': [
         'error',
         {
-          arrayDestructuring: true,
-          arrowParameter: true,
-          memberVariableDeclaration: true,
-          objectDestructuring: true,
-          parameter: true,
-          propertyDeclaration: true,
-          variableDeclaration: true,
-          variableDeclarationIgnoreFunction: false,
+          arrayDestructuring: false, // No requerido - TypeScript infiere bien
+          arrowParameter: false, // No requerido - se infiere del contexto
+          memberVariableDeclaration: false, // No requerido - se puede inferir
+          objectDestructuring: false, // No requerido - TypeScript infiere bien
+          parameter: false, // No requerido - se infiere del uso
+          propertyDeclaration: false, // No requerido - se puede inferir
+          variableDeclaration: false, // No requerido - TypeScript infiere
+          variableDeclarationIgnoreFunction: true, // Permitir inferencia en variables
         },
       ],
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
