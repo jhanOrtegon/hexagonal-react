@@ -1,6 +1,6 @@
-# 🎯 IMPLEMENTACIÓN: Result Type Pattern + Domain Events
+# 🎯 ESTADO DE IMPLEMENTACIÓN
 
-## ✅ COMPLETADO (100%)
+## ✅ COMPLETADO (100%) - Result Type Pattern
 
 ### 1. Tests de Application Layer (45 tests ✅)
 
@@ -87,88 +87,110 @@
 
 ---
 
-## 🚧 PRÓXIMA FASE: Domain Events (0%)
+## � PRÓXIMOS PASOS RECOMENDADOS
 
-### 4. Domain Events Infrastructure
+### 🎯 Prioridad 1: Funcionalidad de Negocio
 
-**Modificar User.entity.ts:**
+#### 1.1 Relaciones entre Entidades
 
-```typescript
-// Cambiar:
-public static create(data: CreateUserData): User {
-  if (invalid) throw new Error();
-  return new User(...);
-}
+- **Order → User**: Un pedido pertenece a un usuario
+- **Order → Product**: Un pedido contiene productos (OrderItems)
+- **Validaciones**: Stock de productos, precios, cantidades
 
-// Por:
-public static create(data: CreateUserData): Result<User, InvalidArgumentError> {
-  if (invalid) return fail(new InvalidArgumentError(...));
-  return ok(new User(...));
-}
-```
+#### 1.2 Validaciones Complejas de Negocio
 
-**Archivos a modificar:**
+- **User**: Validación de email con dominios permitidos
+- **Product**: Validación de precio mínimo, stock negativo
+- **Order**: Validación de estado (pending → completed → cancelled)
 
-- `src/core/user/domain/User.entity.ts` - métodos create, updateEmail, updateName
-- `src/core/user/application/usecases/*.usecase.ts` - todos los use cases
-- `src/presentation/user/hooks/*.ts` - adaptar hooks para manejar Result
+#### 1.3 Value Objects Adicionales
 
-### 4. Domain Events
+- **Money** (amount + currency) para Product.price
+- **OrderStatus** para Order.status
+- **Quantity** para OrderItem.quantity
 
-**Crear infraestructura:**
+---
 
-```typescript
-// src/core/shared/domain/DomainEvent.ts
-export interface DomainEvent {
-  eventId: string;
-  occurredOn: Date;
-  aggregateId: string;
-  eventName: string;
-}
+### 🎨 Prioridad 2: Mejoras en UI/UX
 
-// src/core/shared/domain/AggregateRoot.ts
-export abstract class AggregateRoot {
-  private domainEvents: DomainEvent[] = [];
-  protected addDomainEvent(event: DomainEvent): void;
-  public getDomainEvents(): readonly DomainEvent[];
-  public clearDomainEvents(): void;
-}
-```
+#### 2.1 Formularios con Validación
 
-**Crear eventos específicos:**
+- Usar `react-hook-form` + `zod` para validación client-side
+- Mostrar errores de dominio (`InvalidArgumentError`) en formularios
+- Feedback visual de Result Type (success/error states)
 
-- `src/core/user/domain/events/UserCreated.event.ts`
-- `src/core/user/domain/events/UserEmailChanged.event.ts`
-- `src/core/user/domain/events/UserNameChanged.event.ts`
+#### 2.2 Manejo de Errores Robusto
 
-**Modificar User.entity.ts:**
+- Error boundaries en React
+- Toast notifications para operaciones (usando sonner)
+- Loading states y skeleton loaders
 
-```typescript
-export class User extends AggregateRoot {
-  public static create(...): Result<User, ...> {
-    const user = new User(...);
-    user.addDomainEvent(new UserCreated(user.id, user.email, user.name));
-    return ok(user);
-  }
-}
-```
+#### 2.3 Optimistic Updates
 
-**Crear EventBus:**
+- React Query optimistic updates para mejor UX
+- Rollback automático en caso de error
 
-- `src/infrastructure/events/EventBus.ts`
-- `src/infrastructure/events/handlers/*` - handlers para cada evento
+---
 
-## 📝 PRÓXIMOS PASOS
+### 🔌 Prioridad 3: Integración con Backend Real
 
-1. **Modificar User.entity.ts** para usar Result
-2. **Actualizar Use Cases** para manejar Result
-3. **Adaptar React Hooks** para manejar Result en UI
-4. **Crear infraestructura de eventos**
-5. **Agregar eventos a entities**
-6. **Crear event handlers**
-7. **Integrar EventBus en Use Cases**
+#### 3.1 Completar API Repositories
 
-## 🎓 COMANDOS ÚTILES
+- Implementar `UserApiRepository` completamente
+- Implementar `ProductApiRepository`
+- Implementar `OrderApiRepository`
+
+#### 3.2 Autenticación/Autorización
+
+- JWT tokens
+- Protected routes
+- Refresh token mechanism
+
+#### 3.3 Manejo de Errores HTTP
+
+- Interceptores de Axios para errores globales
+- Retry logic para requests fallidos
+- Timeout handling
+
+---
+
+### 🧪 Prioridad 4: Testing Avanzado
+
+#### 4.1 Integration Tests
+
+- Tests de repositories con API mock (MSW)
+- Tests de hooks de React Query
+
+#### 4.2 E2E Tests
+
+- Playwright o Cypress
+- User flows completos (crear usuario → crear producto → crear orden)
+
+#### 4.3 Performance Tests
+
+- Lighthouse para métricas de performance
+- Bundle size analysis
+
+---
+
+## ❌ NO IMPLEMENTAR (Por ahora)
+
+### Domain Events
+
+**Razón**: YAGNI (You Aren't Gonna Need It)
+
+**¿Cuándo implementar?**
+
+- ✅ Cuando necesites enviar emails/notificaciones
+- ✅ Cuando integres con sistemas externos (webhooks)
+- ✅ Cuando implementes audit logs/histórico de cambios
+- ✅ Cuando tengas efectos secundarios desacoplados
+
+**Mientras tanto**: Los Use Cases pueden llamar directamente a servicios si es necesario.
+
+---
+
+## 📝 COMANDOS ÚTILES
 
 ```bash
 # Ejecutar todos los tests
@@ -184,15 +206,13 @@ pnpm lint
 pnpm build
 ```
 
-## 📊 PROGRESO
+---
 
-- ✅ Tests Application Layer: 100%
-- ✅ Result Type Infrastructure: 100%
-- ⏳ Result Type en Entities: 0%
-- ⏳ Result Type en Use Cases: 0%
-- ⏳ Result Type en UI: 0%
-- ⏳ Domain Events Infrastructure: 0%
-- ⏳ Domain Events en Entities: 0%
-- ⏳ Event Handlers: 0%
+## 📊 RESUMEN
 
-**Total: 40% completado**
+**✅ Arquitectura Base**: Hexagonal Architecture + TDD + Result Type Pattern  
+**✅ Test Coverage**: 223/223 tests (100%)  
+**✅ Type Safety**: TypeScript ultra-estricto  
+**✅ Clean Code**: ESLint + Prettier + Commitlint
+
+**🎯 Siguiente paso**: Elegir una funcionalidad de negocio para implementar (ej: relaciones Order-Product, validaciones complejas, o completar API repositories)
