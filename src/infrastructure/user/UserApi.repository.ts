@@ -1,12 +1,17 @@
 import axios from 'axios';
 
-import { UserResponseMapper } from '@/core/user/application/dtos/UserResponse.dto';
 import type { UserResponseDTO } from '@/core/user/application/types';
 import type { UserRepository, UserFilters } from '@/core/user/domain/types';
-import { User } from '@/core/user/domain/User.entity';
+import type { User } from '@/core/user/domain/User.entity';
 
 import { httpClient } from '../shared/http/axios.client';
 
+import {
+  userApiToDomain,
+  userApiToDomainList,
+  userToApiCreateRequest,
+  userToApiUpdateRequest,
+} from './mappers/UserApi.mapper';
 
 /**
  * UserApiRepository - Implementación con API REST usando Axios
@@ -20,7 +25,7 @@ export class UserApiRepository implements UserRepository {
       const response: UserResponseDTO = await httpClient.get<UserResponseDTO>(
         `${this.basePath}/${id}`
       );
-      return this.mapToEntity(response);
+      return userApiToDomain(response);
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         return null;
@@ -34,7 +39,7 @@ export class UserApiRepository implements UserRepository {
       const response: UserResponseDTO = await httpClient.get<UserResponseDTO>(
         `${this.basePath}/by-email/${encodeURIComponent(email)}`
       );
-      return this.mapToEntity(response);
+      return userApiToDomain(response);
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         return null;
@@ -63,12 +68,11 @@ export class UserApiRepository implements UserRepository {
         params['createdBefore'] = filters.createdBefore.toISOString();
       }
 
-      const response: UserResponseDTO[] = await httpClient.get<UserResponseDTO[]>(
-        this.basePath,
-        { params }
-      );
+      const response: UserResponseDTO[] = await httpClient.get<UserResponseDTO[]>(this.basePath, {
+        params,
+      });
 
-      return response.map((dto: UserResponseDTO) => this.mapToEntity(dto));
+      return userApiToDomainList(response);
     } catch (error: unknown) {
       console.error('Error fetching users from API:', error);
       throw error;
@@ -77,31 +81,25 @@ export class UserApiRepository implements UserRepository {
 
   public async save(user: User): Promise<User> {
     try {
-      const dto: UserResponseDTO = UserResponseMapper.fromEntity(user);
-
       // Verificar si el usuario ya existe (tiene ID válido en la DB)
       const exists: boolean = await this.exists(user.id);
 
       if (exists) {
         // Update
+        const requestBody: { email?: string; name?: string } = userToApiUpdateRequest(user);
         const response: UserResponseDTO = await httpClient.put<UserResponseDTO>(
           `${this.basePath}/${user.id}`,
-          {
-            name: dto.name,
-            email: dto.email,
-          }
+          requestBody
         );
-        return this.mapToEntity(response);
+        return userApiToDomain(response);
       } else {
         // Create
+        const requestBody: { email: string; name: string } = userToApiCreateRequest(user);
         const response: UserResponseDTO = await httpClient.post<UserResponseDTO>(
           this.basePath,
-          {
-            name: dto.name,
-            email: dto.email,
-          }
+          requestBody
         );
-        return this.mapToEntity(response);
+        return userApiToDomain(response);
       }
     } catch (error: unknown) {
       console.error('Error saving user to API:', error);
@@ -145,18 +143,5 @@ export class UserApiRepository implements UserRepository {
       }
       throw error;
     }
-  }
-
-  /**
-   * Helper para mapear DTO a Entity
-   */
-  private mapToEntity(dto: UserResponseDTO): User {
-    return User.restore({
-      id: dto.id,
-      email: dto.email,
-      name: dto.name,
-      createdAt: new Date(dto.createdAt),
-      updatedAt: new Date(dto.updatedAt),
-    });
   }
 }
