@@ -18,6 +18,7 @@ import type {
   UpdateOrderStatusDTO,
 } from '../../../core/order/application/types';
 import type { OrderFilters, OrderRepository } from '../../../core/order/domain/types';
+import type { UserRepository } from '../../../core/user/domain/types';
 import type { QueryClient, UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 
 const QUERY_KEY_ORDERS: 'orders' = 'orders' as const;
@@ -97,8 +98,9 @@ export function useCreateOrderMutation(): UseMutationResult<
   CreateOrderDTO
 > {
   const queryClient: QueryClient = useQueryClient();
-  const repository: OrderRepository = container.getOrderRepository();
-  const createOrder: CreateOrder = new CreateOrder(repository);
+  const orderRepository: OrderRepository = container.getOrderRepository();
+  const userRepository: UserRepository = container.getUserRepository();
+  const createOrder: CreateOrder = new CreateOrder(orderRepository, userRepository);
 
   return useMutation<OrderResponseDTO, Error, CreateOrderDTO>({
     mutationFn: async (dto: CreateOrderDTO): Promise<OrderResponseDTO> => createOrder.execute(dto),

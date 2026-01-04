@@ -26,3 +26,12 @@ export class InvalidOrderStatusTransitionError extends DomainError {
     super(`Cannot transition order status from ${from} to ${to}`);
   }
 }
+
+/**
+ * Error cuando el usuario asociado al pedido no existe
+ */
+export class OrderUserNotFoundError extends DomainError {
+  constructor(userId: string) {
+    super(`Cannot create order: User with ID "${userId}" does not exist`);
+  }
+}
