@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Zod Schema para validación de CreateUser
  * Valida email y name según reglas de dominio
  */
-export const createUserSchema: ReturnType<typeof z.object> = z.object({
+export const createUserSchema = z.object({
   email: z
     .string()
     .min(1, 'Email is required')
@@ -27,7 +27,7 @@ export const createUserSchema: ReturnType<typeof z.object> = z.object({
 /**
  * Zod Schema para validación de UpdateUser
  */
-export const updateUserSchema: ReturnType<typeof z.object> = z.object({
+export const updateUserSchema = z.object({
   email: z
     .string()
     .max(255, 'Email must be less than 255 characters')

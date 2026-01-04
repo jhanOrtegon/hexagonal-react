@@ -21,17 +21,14 @@ import { useCreateUserMutation } from '../hooks/useUser.query';
 
 import type { CreateUserFormData } from '../adapters/user.validation';
 
-type UseMutationResult = ReturnType<typeof useCreateUserMutation>;
-type UseFormResult = ReturnType<typeof useForm<CreateUserFormData>>;
-
 /**
  * CreateUserForm Component
  * Formulario con validación client-side para crear usuarios
  */
 export const CreateUserForm: React.FC = (): React.JSX.Element => {
-  const createMutation: UseMutationResult = useCreateUserMutation();
+  const createMutation = useCreateUserMutation();
 
-  const form: UseFormResult = useForm<CreateUserFormData>({
+  const form = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserSchema),
     defaultValues: {
       email: '',
@@ -39,13 +36,11 @@ export const CreateUserForm: React.FC = (): React.JSX.Element => {
     },
   });
 
-  const onSubmit: (data: CreateUserFormData) => Promise<void> = async (
-    data: CreateUserFormData
-  ): Promise<void> => {
+  const onSubmit = async (data: CreateUserFormData): Promise<void> => {
     try {
       await createMutation.mutateAsync(data);
       toast.success('User created successfully!', {
-        description: `${String(data.name)} (${String(data.email)}) has been added to the system.`,
+        description: `${data.name} (${data.email}) has been added to the system.`,
       });
       form.reset();
     } catch (error: unknown) {
