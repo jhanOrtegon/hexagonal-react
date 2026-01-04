@@ -21,6 +21,7 @@ export default tseslint.config(
       '**/*.test.ts',
       '**/*.test.tsx',
       '@/**',
+      'src/presentation/shared/components/ui/**', // shadcn/ui generated components
     ],
   },
   {
