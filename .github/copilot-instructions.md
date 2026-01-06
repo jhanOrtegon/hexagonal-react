@@ -21,6 +21,7 @@ Este proyecto sigue **Clean Architecture (Hexagonal Architecture)** con **Domain
 **Ubicación**: `src/core/{module}/`
 
 #### Domain Layer (`domain/`)
+
 - **Entidades**: Objetos con identidad única (`*.entity.ts`)
 - **Value Objects**: Objetos inmutables sin identidad (`*.vo.ts`)
 - **Repositorios**: Interfaces de contratos (`*.repository.ts`)
@@ -29,6 +30,7 @@ Este proyecto sigue **Clean Architecture (Hexagonal Architecture)** con **Domain
 - **Tests**: Tests unitarios del dominio (`__tests__/*.test.ts`)
 
 **Reglas**:
+
 - ❌ NO importar nada de `infrastructure` o `presentation`
 - ❌ NO depender de librerías externas (excepto utilidades puras)
 - ✅ Solo lógica de negocio pura
@@ -36,12 +38,14 @@ Este proyecto sigue **Clean Architecture (Hexagonal Architecture)** con **Domain
 - ✅ Todos los métodos públicos deben tener tipo de retorno explícito
 
 #### Application Layer (`application/`)
+
 - **Use Cases**: Casos de uso de la aplicación (`usecases/*.usecase.ts`)
 - **DTOs**: Data Transfer Objects (`dtos/*.dto.ts`)
 - **Interfaces de Servicios**: Contratos de servicios externos
 - **Tests**: Tests de casos de uso (`__tests__/*.test.ts`)
 
 **Reglas**:
+
 - ❌ NO importar nada de `infrastructure` o `presentation`
 - ✅ Orquestar el dominio para cumplir casos de uso
 - ✅ Recibir dependencias mediante inyección (constructor)
@@ -54,6 +58,7 @@ Este proyecto sigue **Clean Architecture (Hexagonal Architecture)** con **Domain
 **Ubicación**: `src/infrastructure/{module}/`
 
 **Responsabilidades**:
+
 - Implementaciones concretas de repositorios
 - Clientes HTTP/API
 - Servicios de almacenamiento (localStorage, IndexedDB)
@@ -61,12 +66,14 @@ Este proyecto sigue **Clean Architecture (Hexagonal Architecture)** con **Domain
 - Configuración de dependencias
 
 **Reglas**:
+
 - ✅ Implementar interfaces definidas en el dominio
 - ✅ Usar mappers para transformar datos externos
 - ❌ NO exponer detalles de implementación al dominio
 - ✅ Manejar errores de infraestructura y transformarlos a errores de dominio
 
 #### Dependency Injection Container (`di/container.ts`)
+
 - Gestión centralizada de dependencias
 - Configuración según entorno (dev/prod)
 - Singleton pattern para servicios compartidos
@@ -78,6 +85,7 @@ Este proyecto sigue **Clean Architecture (Hexagonal Architecture)** con **Domain
 **Ubicación**: `src/presentation/{module}/`
 
 #### Estructura por Módulo:
+
 ```
 presentation/{module}/
 ├── components/       # Componentes React específicos del módulo
@@ -89,6 +97,7 @@ presentation/{module}/
 ```
 
 #### Shared Presentation:
+
 ```
 presentation/shared/
 ├── components/ui/   # Componentes UI reutilizables (shadcn/ui)
@@ -99,12 +108,14 @@ presentation/shared/
 ```
 
 **Reglas**:
+
 - ✅ Usar ViewModels para lógica de presentación compleja
 - ✅ Inyectar casos de uso mediante hooks
 - ✅ Mantener componentes tontos (dumb components)
 - ❌ NO incluir lógica de negocio en componentes
-- ✅ Tipos explícitos en todos los componentes y hooks
+- ✅ Tipos explícitos solo cuando sea necesario para claridad
 - ✅ Props interfaces siempre definidas
+- ✅ Aprovechar inferencia de tipos de TypeScript
 
 ---
 
@@ -113,6 +124,7 @@ presentation/shared/
 ### Naming Conventions
 
 #### Archivos:
+
 - **Entidades**: `{Entity}.entity.ts` → `User.entity.ts`
 - **Value Objects**: `{ValueObject}.vo.ts` → `Email.vo.ts`
 - **Repositorios (interface)**: `{Entity}.repository.ts` → `User.repository.ts`
@@ -125,8 +137,10 @@ presentation/shared/
 - **Componentes**: `{Component}.tsx` → `UserCard.tsx`
 - **Hooks**: `use{Feature}.ts` → `useUser.ts`
 - **ViewModels**: `{Feature}.viewmodel.ts` → `UserList.viewmodel.ts`
+- **Adapters**: `{feature}.{type}.ts` → `user.validation.ts`, `user.mapper.ts`
 
 #### Clases e Interfaces:
+
 - **Entidades**: PascalCase → `User`, `Product`, `Order`
 - **Interfaces**: PascalCase → `UserRepository`, `EmailService`
 - **Use Cases**: PascalCase → `CreateUser`, `UpdateUserEmail`
@@ -135,6 +149,7 @@ presentation/shared/
 - **Types**: PascalCase → `UserId`, `UserEmail`
 
 #### Variables y Funciones:
+
 - **camelCase** para todo: `findUserById`, `userRepository`, `createUser`
 - **UPPER_SNAKE_CASE** para constantes: `MAX_RETRY_ATTEMPTS`, `API_BASE_URL`
 
@@ -145,11 +160,13 @@ presentation/shared/
 ### Test-Driven Development (TDD)
 
 **Proceso RED-GREEN-REFACTOR**:
+
 1. 🔴 **Red**: Escribir test que falla
 2. 🟢 **Green**: Escribir código mínimo para pasar el test
 3. 🔵 **Refactor**: Mejorar el código manteniendo tests verdes
 
 ### Ubicación de Tests:
+
 ```
 {module}/
 ├── domain/
@@ -200,13 +217,7 @@ export class User {
   public readonly updatedAt: Date;
 
   // Constructor privado - usar factory methods
-  private constructor(
-    id: string,
-    email: string,
-    name: string,
-    createdAt: Date,
-    updatedAt: Date
-  ) {
+  private constructor(id: string, email: string, name: string, createdAt: Date, updatedAt: Date) {
     this.id = id;
     this.email = email;
     this.name = name;
@@ -217,36 +228,18 @@ export class User {
   // Factory method para crear nueva instancia
   public static create(data: CreateUserData): User {
     // Validaciones de dominio aquí
-    return new User(
-      crypto.randomUUID(),
-      data.email,
-      data.name,
-      new Date(),
-      new Date()
-    );
+    return new User(crypto.randomUUID(), data.email, data.name, new Date(), new Date());
   }
 
   // Factory method para reconstruir desde persistencia
   public static restore(data: RestoreUserData): User {
-    return new User(
-      data.id,
-      data.email,
-      data.name,
-      data.createdAt,
-      data.updatedAt
-    );
+    return new User(data.id, data.email, data.name, data.createdAt, data.updatedAt);
   }
 
   // Método de comportamiento - devuelve nueva instancia
   public updateName(newName: string): User {
     // Validaciones aquí
-    return new User(
-      this.id,
-      this.email,
-      newName,
-      this.createdAt,
-      new Date()
-    );
+    return new User(this.id, this.email, newName, this.createdAt, new Date());
   }
 
   // Método de comparación
@@ -333,9 +326,7 @@ export class CreateUser {
 
   public async execute(dto: CreateUserDTO): Promise<UserResponseDTO> {
     // 1. Validar que el email no exista
-    const existingUser: User | null = await this.userRepository.findByEmail(
-      dto.email
-    );
+    const existingUser: User | null = await this.userRepository.findByEmail(dto.email);
     if (existingUser !== null) {
       throw new UserEmailAlreadyExistsError(dto.email);
     }
@@ -370,9 +361,7 @@ export class UserApiRepository implements UserRepository {
 
   public async findById(id: string): Promise<User | null> {
     try {
-      const response: ApiUserResponse = await this.httpClient.get<ApiUserResponse>(
-        `/users/${id}`
-      );
+      const response: ApiUserResponse = await this.httpClient.get<ApiUserResponse>(`/users/${id}`);
       return this.mapper.toDomain(response);
     } catch (error: unknown) {
       if (error instanceof NotFoundError) {
@@ -384,10 +373,7 @@ export class UserApiRepository implements UserRepository {
 
   public async save(user: User): Promise<User> {
     const dto: ApiUserRequest = this.mapper.toApi(user);
-    const response: ApiUserResponse = await this.httpClient.post<ApiUserResponse>(
-      '/users',
-      dto
-    );
+    const response: ApiUserResponse = await this.httpClient.post<ApiUserResponse>('/users', dto);
     return this.mapper.toDomain(response);
   }
 }
@@ -411,7 +397,7 @@ export const UserCard: React.FC<UserCardProps> = ({
   onEdit,
   onDelete,
 }: UserCardProps): React.JSX.Element => {
-  const { user, isLoading, error }: UseUserReturn = useUser(userId);
+  const { user, isLoading, error } = useUser(userId);
 
   if (isLoading) {
     return <Skeleton />;
@@ -461,17 +447,17 @@ interface UseUserReturn {
 }
 
 export const useUser = (userId: string): UseUserReturn => {
-  const [user, setUser]: [User | null, React.Dispatch<React.SetStateAction<User | null>>] = useState<User | null>(null);
-  const [isLoading, setIsLoading]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = useState<boolean>(true);
-  const [error, setError]: [Error | null, React.Dispatch<React.SetStateAction<Error | null>>] = useState<Error | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const fetchUser = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const repository: UserRepository = container.getUserRepository();
-      const foundUser: User | null = await repository.findById(userId);
+      const repository = container.getUserRepository();
+      const foundUser = await repository.findById(userId);
       setUser(foundUser);
     } catch (err: unknown) {
       setError(err instanceof Error ? err : new Error('Unknown error'));
@@ -492,9 +478,9 @@ export const useUser = (userId: string): UseUserReturn => {
 
 ## ⚙️ TypeScript Configuration
 
-### Configuración Super Estricta
+### Configuración Estricta con Inferencia
 
-El proyecto usa la configuración TypeScript más estricta posible:
+El proyecto usa una configuración TypeScript estricta que balancea seguridad de tipos con productividad:
 
 ```jsonc
 {
@@ -524,32 +510,45 @@ El proyecto usa la configuración TypeScript más estricta posible:
     // Validación de propiedades
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "exactOptionalPropertyTypes": true
-  }
+    "exactOptionalPropertyTypes": true,
+  },
 }
 ```
 
-### ESLint - Tipado Obligatorio
+### ESLint - Inferencia de Tipos Permitida
+
+La configuración de ESLint permite que TypeScript infiera tipos donde sea obvio, reduciendo ruido visual:
 
 ```javascript
 {
   "@typescript-eslint/typedef": [
     "error",
     {
-      "arrayDestructuring": true,
-      "arrowParameter": true,
-      "memberVariableDeclaration": true,
-      "objectDestructuring": true,
-      "parameter": true,
-      "propertyDeclaration": true,
-      "variableDeclaration": true,
-      "variableDeclarationIgnoreFunction": false
+      // Permitir inferencia en la mayoría de casos
+      "arrayDestructuring": false,
+      "arrowParameter": false,
+      "memberVariableDeclaration": false,
+      "objectDestructuring": false,
+      "parameter": false,
+      "propertyDeclaration": false,
+      "variableDeclaration": false,
+      "variableDeclarationIgnoreFunction": true,
     }
   ]
 }
 ```
 
+**Filosofía de Tipado:**
+
+- ✅ Tipos explícitos en **interfaces públicas** (props, parámetros de funciones exportadas)
+- ✅ Tipos explícitos en **retornos de funciones** para claridad
+- ✅ Tipos explícitos en **estados con tipos complejos** (`useState<User | null>`)
+- ✅ Inferencia automática en **variables locales** y **destructuring**
+- ✅ Inferencia automática en **hooks de React** (`const navigate = useNavigate()`)
+- ❌ Evitar tipos redundantes que TypeScript puede inferir obviosamente
+
 **TODO debe estar tipado explícitamente**:
+
 - Variables
 - Parámetros de funciones
 - Retornos de funciones
@@ -562,16 +561,19 @@ El proyecto usa la configuración TypeScript más estricta posible:
 
 ### ✅ SIEMPRE HACER:
 
-1. **Tipado Explícito Total**:
+1. **Tipado Explícito en Interfaces Públicas**:
+
    ```typescript
-   // ❌ INCORRECTO
-   const user = await repository.findById(id);
-   
-   // ✅ CORRECTO
-   const user: User | null = await repository.findById(id);
+   // ✅ CORRECTO - Tipo explícito en retorno de función pública
+   export const useUser = (userId: string): UseUserReturn => {
+     const user = useState<User | null>(null); // Explícito en tipos complejos
+     const navigate = useNavigate(); // Inferencia permitida
+     // ...
+   };
    ```
 
 2. **Propiedades Readonly en Entities**:
+
    ```typescript
    // ✅ CORRECTO
    export class User {
@@ -580,7 +582,8 @@ El proyecto usa la configuración TypeScript más estricta posible:
    }
    ```
 
-3. **Retornos Explícitos en Funciones**:
+3. **Retornos Explícitos en Funciones Exportadas**:
+
    ```typescript
    // ✅ CORRECTO
    public async findById(id: string): Promise<User | null> {
@@ -589,6 +592,7 @@ El proyecto usa la configuración TypeScript más estricta posible:
    ```
 
 4. **Inyección de Dependencias en Constructor**:
+
    ```typescript
    // ✅ CORRECTO
    export class CreateUser {
@@ -597,6 +601,7 @@ El proyecto usa la configuración TypeScript más estricta posible:
    ```
 
 5. **Tests Junto al Código**:
+
    ```
    domain/
    ├── User.entity.ts
@@ -604,21 +609,33 @@ El proyecto usa la configuración TypeScript más estricta posible:
        └── User.entity.test.ts
    ```
 
+6. **NO usar tipos explícitos en Zod schemas**:
+
+   ```typescript
+   // ❌ INCORRECTO - tipo demasiado genérico
+   export const userSchema: ReturnType<typeof z.object> = z.object({...})
+
+   // ✅ CORRECTO - Zod infiere el tipo exacto
+   export const userSchema = z.object({...})
+   ```
+
 ### ❌ NUNCA HACER:
 
 1. **NO importar Infrastructure en Core**:
+
    ```typescript
    // ❌ PROHIBIDO en domain/ o application/
    import { UserApiRepository } from '../../infrastructure/user/UserApi.repository';
    ```
 
 2. **NO usar `any` o `unknown` sin validación**:
+
    ```typescript
    // ❌ INCORRECTO
    catch (error: any) {
      console.log(error);
    }
-   
+
    // ✅ CORRECTO
    catch (error: unknown) {
      if (error instanceof Error) {
@@ -628,19 +645,21 @@ El proyecto usa la configuración TypeScript más estricta posible:
    ```
 
 3. **NO mutar entities**:
+
    ```typescript
    // ❌ INCORRECTO
    user.name = 'New Name';
-   
+
    // ✅ CORRECTO
-   const updatedUser: User = user.updateName('New Name');
+   const updatedUser = user.updateName('New Name');
    ```
 
 4. **NO lógica de negocio en Presentation**:
+
    ```typescript
    // ❌ INCORRECTO - en un componente
    const isValid = user.email.includes('@');
-   
+
    // ✅ CORRECTO - en entity
    public isValidEmail(): boolean {
      // lógica de validación
@@ -648,15 +667,54 @@ El proyecto usa la configuración TypeScript más estricta posible:
    ```
 
 5. **NO acceso directo a repositorios desde componentes**:
+
    ```typescript
    // ❌ INCORRECTO
    const UserComponent = () => {
      const repo = new UserApiRepository();
    };
-   
+
    // ✅ CORRECTO
    const UserComponent = () => {
      const { user } = useUser(userId); // Hook abstrae el acceso
+   };
+   ```
+
+6. **NO usar tipos explícitos redundantes en Zod**:
+
+   ```typescript
+   // ❌ INCORRECTO - pierde inferencia de tipos
+   const schema: ReturnType<typeof z.object> = z.object({
+     email: z.string().email(),
+   });
+
+   // ✅ CORRECTO - Zod infiere tipos correctamente
+   const schema = z.object({
+     email: z.string().email(),
+   });
+   ```
+
+7. **NO usar async handlers directamente en eventos de React**:
+
+   ```typescript
+   // ❌ INCORRECTO - async handler sin manejo de promesa
+   const handleSubmit = async (data: FormData): Promise<void> => {
+     await createUser(data);
+     navigate('/users');
+   };
+   <form onSubmit={form.handleSubmit(handleSubmit)}>
+
+   // ✅ CORRECTO - usar IIFE o callback sync con async interno
+   const handleSubmit = (data: FormData): void => {
+     // eslint-disable-next-line @typescript-eslint/no-floating-promises
+     (async (): Promise<void> => {
+       try {
+         await createUser(data);
+         navigate('/users');
+       } catch (error: unknown) {
+         handleError(error);
+       }
+     })();
    };
    ```
 
@@ -667,6 +725,7 @@ El proyecto usa la configuración TypeScript más estricta posible:
 Cuando crees un nuevo módulo (ej: `product`, `order`), sigue estos pasos:
 
 ### 1. Domain Layer
+
 - [ ] `{Entity}.entity.ts` - Entidad principal
 - [ ] `{Entity}.repository.ts` - Interface del repositorio
 - [ ] `{Entity}.types.ts` - Tipos y interfaces
@@ -675,6 +734,7 @@ Cuando crees un nuevo módulo (ej: `product`, `order`), sigue estos pasos:
 - [ ] Value Objects si son necesarios (`*.vo.ts`)
 
 ### 2. Application Layer
+
 - [ ] `usecases/Create{Entity}.usecase.ts`
 - [ ] `usecases/Update{Entity}.usecase.ts`
 - [ ] `usecases/Delete{Entity}.usecase.ts`
@@ -683,18 +743,21 @@ Cuando crees un nuevo módulo (ej: `product`, `order`), sigue estos pasos:
 - [ ] `__tests__/*.usecase.test.ts`
 
 ### 3. Infrastructure Layer
+
 - [ ] `{Entity}Api.repository.ts` - Implementación con API
 - [ ] `{Entity}Local.repository.ts` - Implementación local (opcional)
 - [ ] `mappers/{Entity}.mapper.ts` - Mapeo entre API y Domain
 - [ ] Actualizar `di/container.ts` con nuevas dependencias
 
 ### 4. Presentation Layer
+
 - [ ] `components/` - Componentes específicos
 - [ ] `hooks/use{Entity}.ts` - Hook principal
 - [ ] `pages/` - Páginas del módulo
 - [ ] `view-models/` - Si hay lógica compleja de presentación
 
 ### 5. Module Index
+
 - [ ] `core/{module}/index.ts` - Exportar API pública del módulo
 
 ---
@@ -714,6 +777,53 @@ User Interaction (Presentation)
       ↓
   External API/Storage
 ```
+
+---
+
+## 🚀 Características Avanzadas Implementadas
+
+### 1. **React Query con Optimistic Updates**
+
+- Gestión de estado de servidor con caché inteligente
+- Optimistic updates para mejor UX
+- Auto-revalidación y sincronización
+- Estados de loading, error y success automáticos
+
+### 2. **Axios Interceptors con Retry Logic**
+
+- Interceptor de request: auto-inyección de token JWT
+- Interceptor de response: manejo automático de errores 401
+- Retry logic para errores de red temporales
+- Event system para comunicación entre capas
+
+### 3. **JWT Authentication**
+
+- Login/logout con token persistence
+- Protected routes con guards
+- Auto-logout en 401 errors
+- AuthContext con React Context API
+- useAuth hook para consumir auth state
+
+### 4. **Form Validation con Zod**
+
+- Schemas de validación type-safe
+- Integración con react-hook-form
+- Validación client-side antes de enviar al backend
+- Mensajes de error personalizados
+
+### 5. **Error Boundary**
+
+- Captura de errores en componentes React
+- Fallback UI amigable
+- Logging de errores para debugging
+- Reset de estado de error
+
+### 6. **Toast Notifications (Sonner)**
+
+- Notificaciones para feedback de usuario
+- Success, error, warning, info
+- Animaciones suaves
+- Auto-dismiss configurable
 
 ---
 
